@@ -845,6 +845,11 @@ public partial class Dynamic : Instance
 
 	internal Transform3D GetGlobalTransform()
 	{
+		if (this is Part part && part.TryGetAssemblyTransform(out Transform3D trans))
+		{
+			return trans;
+		}
+
 		var t = GDNode3D.GlobalTransform;
 		return t * Transform3D.Identity.Scaled(NodeSize);
 	}

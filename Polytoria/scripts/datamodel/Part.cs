@@ -4,6 +4,7 @@
 
 using Godot;
 using Polytoria.Attributes;
+using Polytoria.Physics;
 using Polytoria.Shared;
 
 namespace Polytoria.Datamodel;
@@ -23,9 +24,14 @@ public partial class Part : Entity
 	private Node3D _nRemoteAt = null!; // Remote collider proxy
 
 	internal Shape3D ColliderShape => _collider.Shape;
+	internal WeldAssembly? Assembly { get; private set; }
+	internal Transform3D AssemblyLocalTransform = Transform3D.Identity;
 
 	public bool IsMeshSeparated => _isSeparateMesh;
 	public int BridgeID = -1;
+
+	private Node? _originalMeshParent;
+	private Node? _originalRemoteParent;
 
 	public override void EnterTree()
 	{
@@ -253,6 +259,99 @@ public partial class Part : Entity
 		{
 			_mesh?.CastShadow = _castShadows ? GeometryInstance3D.ShadowCastingSetting.On : GeometryInstance3D.ShadowCastingSetting.Off;
 		}
+	}
+
+	internal void AttachToAssembly(WeldAssembly ass, Part root, Transform3D localTrans)
+	{
+		Assembly = ass;
+		AssemblyLocalTransform = localTrans;
+		OverrideNoMultiMesh = true;
+		Root?.Bridge?.RemovePart(this);
+		CreateSeparateMesh();
+
+		if (this != root)
+		{
+			OverridePhysicsProcess = true;
+			SetPhysicsProcess(false);
+			OverrideNetworkTransform = true;
+			AutoUpdateNetTransform = false;
+
+			GDRigidBody.Freeze = true;
+			GDRigidBody.Sleeping = true;
+		}
+
+		Node3D rootBody = root.GDNode3D;
+
+		if (_mesh != null)
+		{
+			_originalMeshParent ??= _mesh.GetParent();
+			_mesh.Reparent(rootBody, keepGlobalTransform: true);
+			_mesh.Transform = localTrans;
+			_mesh.Scale = NodeSize;
+		}
+
+		if (_nRemoteAt != null)
+		{
+			_originalRemoteParent ??= _nRemoteAt.GetParent();
+			_nRemoteAt.Reparent(rootBody, keepGlobalTransform: true);
+			_nRemoteAt.Transform = localTrans;
+			_nRemoteAt.Scale = NodeSize;
+		}
+
+		if (this != root)
+		{
+			SetAssemblyCollisionRoot(root);
+		}
+	}
+
+	internal void DetachFromAssembly()
+	{
+		if (_mesh != null && _originalMeshParent != null && Node.IsInstanceValid(_originalMeshParent))
+		{
+			_mesh.Reparent(_originalMeshParent, keepGlobalTransform: true);
+			_mesh.Transform = Transform3D.Identity;
+			_mesh.Scale = NodeSize;
+		}
+
+		if (_nRemoteAt != null && _originalRemoteParent != null && Node.IsInstanceValid(_originalRemoteParent))
+		{
+			_nRemoteAt.Reparent(_originalRemoteParent, keepGlobalTransform: true);
+			_nRemoteAt.Position = Vector3.Zero;
+			_nRemoteAt.Rotation = Vector3.Zero;
+			_nRemoteAt.Scale = NodeSize;
+		}
+
+		SetAssemblyCollisionRoot(null);
+
+		OverridePhysicsProcess = false;
+		OverrideNetworkTransform = false;
+		AutoUpdateNetTransform = true;
+
+		Assembly = null;
+		AssemblyLocalTransform = Transform3D.Identity;
+
+		_originalMeshParent = null;
+		_originalRemoteParent = null;
+
+		OverrideNoMultiMesh = false;
+		Root?.Bridge?.AddPart(this);
+
+		UpdateFreeze();
+		UpdateCollision();
+	}
+
+	internal bool TryGetAssemblyTransform(out Transform3D trans)
+	{
+		if (Assembly == null || Assembly.Root == null)
+		{
+			trans = default;
+			return false;
+		}
+
+		Transform3D rootBody = Assembly.Root.GDNode3D.GlobalTransform;
+		trans = rootBody * AssemblyLocalTransform * Transform3D.Identity.Scaled(NodeSize);
+
+		return true;
 	}
 
 	public override Aabb GetSelfBound()

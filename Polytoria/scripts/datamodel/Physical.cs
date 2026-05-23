@@ -264,10 +264,26 @@ public partial class Physical : Dynamic
 	}
 
 	public Physical? PhysicalRoot { get; private set; }
+	internal Physical? AssemblyCollisionRoot { get; private set; }
 
 	internal bool OverrideCanCollide = false;
 	internal bool OverrideCanCollideTo = false;
 	internal bool OverridePhysicsProcess = false;
+
+	internal void SetAssemblyCollisionRoot(Physical? root)
+	{
+		if (AssemblyCollisionRoot == root)
+		{
+			return;
+		}
+
+		AssemblyCollisionRoot = root;
+
+		foreach (CollisionShape3D shape in CollisionShapes.ToArray())
+		{
+			PostCollisionShapeUpdate(shape);
+		}
+	}
 
 	public override void HiddenChanged(bool to)
 	{
@@ -843,6 +859,11 @@ public partial class Physical : Dynamic
 
 	private Node GetCollisionShapeRoot()
 	{
+		if (AssemblyCollisionRoot != null && Node.IsInstanceValid(AssemblyCollisionRoot.GDNode))
+		{
+			return AssemblyCollisionRoot.GDNode;
+		}
+
 		if (PhysicalRoot != null)
 		{
 			return PhysicalRoot.GDNode;
