@@ -84,6 +84,34 @@ public static class WeldGraph
 		return null;
 	}
 
+	internal static bool AreConnected(Part a, Part b)
+	{
+		foreach (Weld weld in GetWelds(a))
+		{
+			Part? other = GetOtherPart(weld, a);
+			if (other == b)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	internal static bool TryGetParts(Weld weld, out Part a, out Part b)
+	{
+		if (weld.Part0 is Part p0 && weld.Part1 is Part p1 && p0 != p1)
+		{
+			a = p0;
+			b = p1;
+			return true;
+		}
+
+		a = null!;
+		b = null!;
+		return false;
+	}
+
 	internal static bool AreConnected(Part start, Part target, HashSet<Part> limit)
 	{
 		if (start == target)
@@ -124,10 +152,56 @@ public static class WeldGraph
 		return false;
 	}
 
+	internal static HashSet<Part> GetComponent(Part start)
+	{
+		HashSet<Part> result = new(ReferenceEqualityComparer.Instance);
+		Queue<Part> queue = new();
+
+		if (start.IsDeleted || start.IsInTemporary)
+		{
+			return result;
+		}
+
+		result.Add(start);
+		queue.Enqueue(start);
+
+		while (queue.Count > 0)
+		{
+			Part part = queue.Dequeue();
+
+			if (!_welds.TryGetValue(part, out List<Weld>? welds))
+			{
+				continue;
+			}
+
+			foreach (Weld weld in welds)
+			{
+				Part? other = GetOtherPart(weld, part);
+
+				if (other == null)
+				{
+					continue;
+				}
+
+				if (other.IsDeleted || other.IsInTemporary)
+				{
+					continue;
+				}
+
+				if (result.Add(other))
+				{
+					queue.Enqueue(other);
+				}
+			}
+		}
+
+		return result;
+	}
+
 	internal static HashSet<Part> GetComponentWithin(Part start, HashSet<Part> limit)
 	{
-		HashSet<Part> visited = [];
-		Queue<Part> queue = [];
+		HashSet<Part> visited = new(ReferenceEqualityComparer.Instance);
+		Queue<Part> queue = new();
 
 		if (!limit.Contains(start))
 		{

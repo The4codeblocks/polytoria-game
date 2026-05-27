@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Polytoria.Datamodel;
+using Godot;
 
 namespace Polytoria.Physics;
 
@@ -7,6 +8,12 @@ public static class WeldAssemblyManager
 {
 	private static readonly Dictionary<Part, WeldAssembly> _assemblies = new(ReferenceEqualityComparer.Instance);
 	private static readonly Dictionary<Weld, (Part? part0, Part? part1)> _welds = new(ReferenceEqualityComparer.Instance);
+	private static readonly HashSet<Part> _dirtyParts = new(ReferenceEqualityComparer.Instance);
+	private static readonly HashSet<WeldAssembly> _dirtyAssemblies = new(ReferenceEqualityComparer.Instance);
+
+	private static bool _buildQueued;
+	private static bool _building;
+	private static int _bulkEditDepth;
 
 	internal static void OnWeldChanged(Weld weld, Part? old0, Part? old1, Part? new0, Part? new1)
 	{
@@ -34,52 +41,155 @@ public static class WeldAssemblyManager
 			return;
 		}
 
-		HashSet<Part> merged = [];
+		QueueBuild(a);
+		QueueBuild(b);
+	}
 
-		if (assA != null)
+	private static void QueueBuild(Part part)
+	{
+		if (part.IsDeleted || part.IsInTemporary)
 		{
-			foreach (Part part in assA.Parts)
+			return;
+		}
+
+		_dirtyParts.Add(part);
+
+		if (_buildQueued)
+		{
+			return;
+		}
+
+		_buildQueued = true;
+
+		Callable.From(() =>
+		{
+			_buildQueued = false;
+			FlushBuildQueue();
+		}).CallDeferred();
+	}
+
+	private static void FlushBuildQueue()
+	{
+		if (_building)
+		{
+			return;
+		}
+
+		if (_dirtyParts.Count == 0)
+		{
+			return;
+		}
+
+		_building = true;
+
+		try
+		{
+			HashSet<Part> dirty = new(_dirtyParts, ReferenceEqualityComparer.Instance);
+			_dirtyParts.Clear();
+
+			HashSet<Part> visited = new(ReferenceEqualityComparer.Instance);
+
+			foreach (Part start in dirty)
 			{
-				merged.Add(part);
+				if (visited.Contains(start))
+				{
+					continue;
+				}
+
+				if (start.IsDeleted || start.IsInTemporary)
+				{
+					continue;
+				}
+
+				HashSet<Part> component = WeldGraph.GetComponent(start);
+
+				foreach (Part part in component)
+				{
+					visited.Add(part);
+				}
+
+				if (component.Count <= 1)
+				{
+					continue;
+				}
+
+				HashSet<WeldAssembly> oldAssemblies = new(ReferenceEqualityComparer.Instance);
+				Part? preferredRoot = null;
+
+				foreach (Part part in component)
+				{
+					if (_assemblies.TryGetValue(part, out WeldAssembly? oldAssembly))
+					{
+						if (oldAssemblies.Add(oldAssembly))
+						{
+							if (preferredRoot == null || oldAssembly.Root.Anchored)
+							{
+								preferredRoot = oldAssembly.Root;
+							}
+						}
+					}
+				}
+
+				foreach (WeldAssembly oldAssembly in oldAssemblies)
+				{
+					HashSet<Part> oldParts = new(oldAssembly.Parts, ReferenceEqualityComparer.Instance);
+					oldAssembly.Destroy();
+					Unregister(oldParts);
+				}
+
+				Build(component, preferredRoot ?? start);
 			}
-
-			assA.Destroy();
 		}
-		else
+		finally
 		{
-			merged.Add(a);
+			_building = false;
 		}
+	}
 
-		if (assB != null)
+	internal static void BreakWelds(IEnumerable<Weld> welds)
+	{
+		BeginBulkEdit();
+
+		try
 		{
-			foreach (Part part in assB.Parts)
+			foreach (Weld weld in welds)
 			{
-				merged.Add(part);
+				if (!weld.IsDeleted)
+				{
+					weld.Break();
+				}
 			}
+		}
+		finally
+		{
+			EndBulkEdit();
+		}
+	}
 
-			assB.Destroy();
-		}
-		else
+	internal static void BeginBulkEdit()
+	{
+		if (_bulkEditDepth == 0)
 		{
-			merged.Add(b);
-		}
-
-		Part? preferred;
-
-		if (assA?.Root != null && assA.Root.Anchored)
-		{
-			preferred = assA.Root;
-		}
-		else if (assB?.Root != null && assB.Root.Anchored)
-		{
-			preferred = assB.Root;
-		}
-		else
-		{
-			preferred = assA?.Root ?? assB?.Root ?? a;
+			FlushBuildQueue();
 		}
 
-		Build(merged, preferred);
+		_bulkEditDepth++;
+	}
+
+	internal static void EndBulkEdit()
+	{
+		if (_bulkEditDepth <= 0)
+		{
+			return;
+		}
+
+		_bulkEditDepth--;
+
+		if (_bulkEditDepth == 0)
+		{
+			FlushSplitQueue();
+			FlushBuildQueue();
+		}
 	}
 
 	internal static void OnWeldRemoved(Weld weld)
@@ -92,49 +202,187 @@ public static class WeldAssemblyManager
 
 	internal static void OnWeldRemoved(Weld weld, Part? a, Part? b)
 	{
+		if (_bulkEditDepth == 0)
+		{
+			FlushBuildQueue();
+		}
+
+		WeldAssembly? old = null;
+
+		if (a != null)
+		{
+			old = GetAssembly(a);
+		}
+
+		if (old == null && b != null)
+		{
+			old = GetAssembly(b);
+		}
+
 		WeldGraph.Remove(weld, a, b);
 		_welds.Remove(weld);
 
-		if (a == null || b == null)
+		if (a == null || b == null || old == null)
 		{
 			return;
 		}
 
-		WeldAssembly? old = GetAssembly(a) ?? GetAssembly(b);
+		if (_bulkEditDepth > 0)
+		{
+			_dirtyAssemblies.Add(old);
+			return;
+		}
 
-		if (old == null)
+		RebuildDirtyAssembly(old);
+	}
+
+	private static void FlushSplitQueue()
+	{
+		if (_dirtyAssemblies.Count == 0)
 		{
 			return;
 		}
+
+		HashSet<WeldAssembly> dirty = new(_dirtyAssemblies, ReferenceEqualityComparer.Instance);
+		_dirtyAssemblies.Clear();
+
+		foreach (WeldAssembly old in dirty)
+		{
+			RebuildDirtyAssembly(old);
+		}
+	}
+
+	private static void RebuildDirtyAssembly(WeldAssembly old)
+	{
+		if (old.Parts.Count == 0)
+			return;
 
 		HashSet<Part> oldParts = new(old.Parts, ReferenceEqualityComparer.Instance);
-		Part oldRoot = old.Root;
-
-		if (WeldGraph.AreConnected(a, b, oldParts))
-		{
-			return;
-		}
-
-		HashSet<Part> sideA = WeldGraph.GetComponentWithin(a, oldParts);
-		HashSet<Part> sideB = [];
+		HashSet<Part> validParts = new(ReferenceEqualityComparer.Instance);
 
 		foreach (Part part in oldParts)
 		{
-			if (!sideA.Contains(part))
+			if (!part.IsDeleted && !part.IsInTemporary)
+				validParts.Add(part);
+		}
+
+		if (validParts.Count == 0)
+		{
+			old.Destroy();
+			Unregister(oldParts);
+			return;
+		}
+
+		List<HashSet<Part>> components = [];
+		HashSet<Part> unvisited = new(validParts, ReferenceEqualityComparer.Instance);
+
+		while (unvisited.Count > 0)
+		{
+			Part start = default!;
+
+			foreach (Part part in unvisited)
 			{
-				sideB.Add(part);
+				start = part;
+				break;
+			}
+
+			HashSet<Part> component = WeldGraph.GetComponentWithin(start, validParts);
+
+			foreach (Part part in component)
+				unvisited.Remove(part);
+
+			if (component.Count > 0)
+				components.Add(component);
+		}
+
+		if (components.Count == 1 && components[0].Count == oldParts.Count)
+		{
+			return;
+		}
+
+		HashSet<Part>? retained = null;
+
+		foreach (HashSet<Part> component in components)
+		{
+			if (component.Contains(old.Root))
+			{
+				retained = component;
+				break;
 			}
 		}
 
-		old.Destroy();
-		Unregister(oldParts);
+		if (retained == null)
+		{
+			old.Destroy();
+			Unregister(oldParts);
 
-		Build(sideA, sideA.Contains(oldRoot) ? oldRoot : a);
-		Build(sideB, sideB.Contains(oldRoot) ? oldRoot : b);
+			foreach (HashSet<Part> component in components)
+				Build(component, null);
+
+			return;
+		}
+
+		List<HashSet<Part>> separatedComponents = [];
+
+		foreach (HashSet<Part> component in components)
+		{
+			if (!ReferenceEquals(component, retained))
+				separatedComponents.Add(component);
+		}
+
+		foreach (Part part in oldParts)
+		{
+			if (retained.Contains(part))
+				continue;
+
+			_assemblies.Remove(part);
+			old.Parts.Remove(part);
+			old.LocalTransforms.Remove(part);
+
+			if (old.Physicalized && part.Assembly == old)
+				part.DetachFromAssembly();
+		}
+
+		RefreshAssemblyMetadata(old);
+
+		foreach (HashSet<Part> component in separatedComponents)
+		{
+			if (component.Count <= 1)
+				continue;
+
+			Build(component, null);
+		}
+	}
+
+	private static void RefreshAssemblyMetadata(WeldAssembly assembly)
+	{
+		float totalMass = 0;
+		bool anchored = false;
+
+		foreach (Part part in assembly.Parts)
+		{
+			anchored |= part.Anchored;
+			totalMass += Mathf.Max(part.Mass, Physical.MinMass);
+		}
+
+		assembly.Anchored = anchored;
+
+		if (assembly.Physicalized)
+		{
+			assembly.Root.GDRigidBody.Mass = totalMass;
+
+			foreach (Part part in assembly.Parts)
+				part.UpdateFreeze();
+		}
 	}
 
 	internal static void OnPartDeleted(Part part)
 	{
+		if (_bulkEditDepth == 0)
+		{
+			FlushBuildQueue();
+		}
+
 		WeldAssembly? old = GetAssembly(part);
 
 		foreach (Weld weld in WeldGraph.GetWelds(part).ToArray())
@@ -149,37 +397,13 @@ public static class WeldAssemblyManager
 			return;
 		}
 
-		HashSet<Part> remaining = [];
-
-		foreach (Part p in old.Parts)
+		if (_bulkEditDepth > 0)
 		{
-			if (p != part && !p.IsDeleted)
-			{
-				remaining.Add(p);
-			}
+			_dirtyAssemblies.Add(old);
+			return;
 		}
 
-		old.Destroy();
-		Unregister(old.Parts);
-
-		HashSet<Part> unvisited = [.. remaining];
-
-		while (unvisited.Count > 0)
-		{
-			Part start = default!;
-			foreach (Part p in unvisited)
-			{
-				start = p;
-				break;
-			}
-
-			HashSet<Part> component = WeldGraph.GetComponentWithin(start, remaining);
-
-			foreach (Part p in component)
-				unvisited.Remove(p);
-
-			Build(component, component.Contains(old.Root) ? old.Root : start);
-		}
+		RebuildDirtyAssembly(old);
 	}
 
 	private static WeldAssembly? GetAssembly(Part part)

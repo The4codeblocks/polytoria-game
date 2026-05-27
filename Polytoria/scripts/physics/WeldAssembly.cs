@@ -75,13 +75,6 @@ public class WeldAssembly
 
 		root ??= preferredRoot ?? throw new System.ArgumentException("Empty part set given");
 
-		GD.Print($"[WeldAssembly] root={root.Name} id={root.NetworkedObjectID} pos={root.Position} loaded={root.Root.IsLoaded} session={root.Root.SessionType}");
-
-		foreach (Part part in parts)
-		{
-			GD.Print($"  part={part.Name} id={part.NetworkedObjectID} pos={part.Position} local={(root.GDNode3D.GlobalTransform.AffineInverse() * part.GDNode3D.GlobalTransform).Origin}");
-		}
-
 		WeldAssembly assembly = new()
 		{
 			Root = root,
@@ -91,8 +84,6 @@ public class WeldAssembly
 
 		// in creator we dont want to reparent everything since it will block them from selecting anything other than the root part
 		bool isCreator = root.Root != null && root.Root.SessionType == World.SessionTypeEnum.Creator;
-
-		Color color = (Color)PTColor.Random().ToGDClass(); // random color for debugging
 
 		foreach (Part part in parts)
 		{
@@ -106,7 +97,6 @@ public class WeldAssembly
 		{
 			Transform3D localTrans = rootInv * part.GDNode3D.GlobalTransform;
 			assembly.LocalTransforms[part] = localTrans;
-			part.Color = color; // debug
 
 			if (!isCreator)
 			{
