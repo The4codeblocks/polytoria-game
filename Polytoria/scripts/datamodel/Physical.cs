@@ -637,7 +637,10 @@ public partial class Physical : Dynamic
 	internal void PostCollisionShapeUpdate(CollisionShape3D collisionShape)
 	{
 		RemoveCollisionShape(collisionShape, false);
-		AddCollisionShape(collisionShape);
+		if (CanCollide)
+		{
+			AddCollisionShape(collisionShape);
+		}
 	}
 
 	/// <summary>
