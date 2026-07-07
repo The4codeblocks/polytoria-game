@@ -14,7 +14,7 @@ public partial class Nametag : Node3D
 	private ProgressBar _healthBar = null!;
 	private Node3D _nametag = null!;
 
-	public NPC Target = null!;
+	public CharacterModel Target = null!;
 
 	public override void _Ready()
 	{
@@ -44,13 +44,13 @@ public partial class Nametag : Node3D
 		}
 
 		// Hide if self is Target
-		if (Target == Target.Root.Players?.LocalPlayer)
+		if (Target == Target.Root.Players?.LocalPlayer.Character)
 		{
 			useNametag = false;
 		}
 
 		Visible = useNametag;
-		_titleLabel.Text = Target.DisplayName != string.Empty ? Target.DisplayName : Target.Name;
+		_titleLabel.Text = Target._controller.DisplayName != string.Empty ? Target._controller.DisplayName : Target.Name;
 		_healthBar.Visible = (Target.Health < Target.MaxHealth);
 		_healthBar.Value = Target.Health;
 		_healthBar.MaxValue = Target.MaxHealth;

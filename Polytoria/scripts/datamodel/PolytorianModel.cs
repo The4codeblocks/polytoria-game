@@ -797,7 +797,7 @@ public sealed partial class PolytorianModel : CharacterModel
 			}
 			else if (asset.Type == "tool")
 			{
-				if (Parent is Player plr && loadTool)
+				if (loadTool && this.Inventory != null)
 				{
 					hasTool = true;
 					try
@@ -809,14 +809,14 @@ public sealed partial class PolytorianModel : CharacterModel
 							tool?.Delete();
 							throw new OperationCanceledException("The avatar is deleted");
 						}
-						tool?.Parent = plr.Inventory;
+						tool?.Parent = this.Inventory;
 					}
 					catch (Exception ex)
 					{
 						PT.PrintErr(ex);
 					}
 				}
-				else if (Parent is NPC npc && loadToolNpc)
+				else if (loadToolNpc)
 				{
 					hasTool = true;
 					try
@@ -829,7 +829,7 @@ public sealed partial class PolytorianModel : CharacterModel
 							throw new OperationCanceledException("The avatar is deleted");
 						}
 						if (tool != null)
-							npc.EquipTool(tool);
+							this.EquipTool(tool);
 					}
 					catch (Exception ex)
 					{
@@ -856,12 +856,6 @@ public sealed partial class PolytorianModel : CharacterModel
 		}
 
 		Instance checkOn = this;
-
-		// Check on NPC for loading tools
-		if (Parent is NPC)
-		{
-			checkOn = Parent;
-		}
 
 		foreach (var item in checkOn.GetDescendants())
 		{

@@ -206,13 +206,15 @@ public partial class UIToolItem : Button
 
 	private void OnToggled(bool to)
 	{
-		if (to)
-		{
-			Player.EquipTool(LinkedTool);
-		}
+		if (Player.Character != null) {
+			if (to)
+			{
+				Player.Character.EquipTool(LinkedTool);
+			}
 		else
-		{
-			Player.UnequipTool();
+			{
+				Player.Character.UnequipTool();
+			}
 		}
 	}
 }

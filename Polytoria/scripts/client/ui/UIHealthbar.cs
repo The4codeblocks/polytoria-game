@@ -30,25 +30,27 @@ public partial class UIHealthbar : Control
 
 	public override void _Process(double delta)
 	{
-		if (CoreUI.Root.Players.LocalPlayer != null)
+		Player? localplayer = CoreUI.Root.Players.LocalPlayer;
+		if (localplayer == null) return;
+		CharacterModel? localcharacter = localplayer.Character;
+		if (localcharacter == null) return;
 		{
-			Player localplayer = CoreUI.Root.Players.LocalPlayer;
-			float health = localplayer.Health;
-			float maxHealth = localplayer.MaxHealth;
+			float health = localcharacter.Health;
+			float maxHealth = localcharacter.MaxHealth;
 			Color healthClr = _healthOutColor.Lerp(_healthFullColor, Mathf.Clamp(health / maxHealth, 0, 1));
 
 			_heart.Modulate = healthClr;
 			_healthBar.Modulate = healthClr;
 
-			_staminaBar.Visible = localplayer.UseStamina;
-			_staminaBar.Value = localplayer.Stamina;
-			_staminaBar.MaxValue = localplayer.MaxStamina;
+			_staminaBar.Visible = localcharacter.UseStamina;
+			_staminaBar.Value = localcharacter.Stamina;
+			_staminaBar.MaxValue = localcharacter.MaxStamina;
 
 			_healthBar.Value = health;
 			_healthBar.MaxValue = maxHealth;
 
 			// Hide/Show the stamina bar
-			if (localplayer.Stamina == localplayer.MaxStamina || !localplayer.UseStamina)
+			if (localcharacter.Stamina == localcharacter.MaxStamina || !localcharacter.UseStamina)
 			{
 				if (_staminaBarAppeared)
 				{

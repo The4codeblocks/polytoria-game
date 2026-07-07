@@ -701,7 +701,10 @@ public sealed partial class NetworkService : Instance
 
 		plr.Parent = _players;
 
-		plr.Anchored = true;
+		if (plr.Character != null)
+		{
+			plr.Character.Anchored = true;
+		}
 		plr.IsReady = false;
 
 		// Copy instances from player default
@@ -896,7 +899,10 @@ public sealed partial class NetworkService : Instance
 			if (IsServer)
 			{
 				plr.IsReady = true;
-				plr.Anchored = false;
+				if (plr.Character != null)
+				{
+					plr.Character.Anchored = true;
+				}
 				plr.Respawn();
 				Root.Players.InvokePlayerAdded(plr);
 				RpcId(peerID, nameof(NetRecvReportReady));
