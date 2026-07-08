@@ -317,7 +317,7 @@ public sealed partial class Player : NPC
 	private void UpdatePlrReady()
 	{
 		Character?.SetCollisionDisabled(!_isReady);
-		GDNode3D?.Visible = _isReady;
+		Character?.GDNode3D?.Visible = _isReady;
 	}
 
 	private void SetCamRemoteAttachEnabled(bool enabled)
@@ -365,10 +365,6 @@ public sealed partial class Player : NPC
 		if (!Root.Network.IsServer)
 		{
 			UpdateCamera(delta);
-		}
-		if (!IsLocal)
-		{
-			UpdateTransformTick(delta);
 		}
 
 		if (!IsLocal || !IsReady)
@@ -571,7 +567,7 @@ public sealed partial class Player : NPC
 		cam.FirstPersonExited.Connect(OnFirstPersonExited);
 
 		// Disable auto update, this will be updated manually
-		AutoUpdateNetTransform = false;
+		Character?.AutoUpdateNetTransform = false;
 
 		if (Character is PolytorianModel ptc)
 		{
@@ -728,12 +724,6 @@ public sealed partial class Player : NPC
 		Character?.OverrideCanCollide = false;
 		Character?.UpdateCollision();
 		Character?.IsDead = false;
-	}
-
-	internal override bool TransformNetworkCheck(TransformPayloadDto newTransform)
-	{
-		// TODO: Make sanity checks here
-		return true;
 	}
 
 	internal void AdminKick()

@@ -14,7 +14,7 @@ using Polytoria.Utils;
 namespace Polytoria.Datamodel;
 
 [Instantiable]
-public partial class NPC : Dynamic
+public partial class NPC : Instance
 {
 	private const float NavigationDistance = 2f;
 	public const float BodyRotateLerp = 10f;
@@ -33,10 +33,6 @@ public partial class NPC : Dynamic
 	private Color? _pendingLeftLegColor;
 	private Color? _pendingRightLegColor;
 	private int? _pendingFaceID;
-
-	protected override float PositionSyncThreshold => 0.1f;
-	protected override float RotationSyncThreshold => 1f;
-
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Apply them to Character"), CloneIgnore]
 	public Color HeadColor
@@ -257,9 +253,9 @@ public partial class NPC : Dynamic
 
 		if (walkTarget.HasValue)
 		{
-			Vector3 velo = GetGlobalPosition().DirectionTo(walkTarget.Value with { Y = Character.Position.Y });
+			Vector3 velo = Character.GetGlobalPosition().DirectionTo(walkTarget.Value with { Y = Character.Position.Y });
 			Character.CharacterVelocity = new(velo.X * Character.WalkSpeed, Character.CharacterVelocity.Y, velo.Z * Character.WalkSpeed);
-			Character.GDNode3D.GlobalRotationDegrees = new Vector3(Rotation.X, Mathf.RadToDeg(Mathf.LerpAngle(Mathf.DegToRad(Character.Rotation.Y), Mathf.Atan2(Character.CharacterVelocity.X, Character.CharacterVelocity.Z), MathUtils.ExpDecay((float)delta, BodyRotateLerp))), Character.Rotation.Z);
+			Character.GDNode3D.GlobalRotationDegrees = new Vector3(Character.Rotation.X, Mathf.RadToDeg(Mathf.LerpAngle(Mathf.DegToRad(Character.Rotation.Y), Mathf.Atan2(Character.CharacterVelocity.X, Character.CharacterVelocity.Z), MathUtils.ExpDecay((float)delta, BodyRotateLerp))), Character.Rotation.Z);
 
 			float distanceToTarget = Character.GetGlobalPosition().DistanceTo(walkTarget.Value);
 
@@ -350,6 +346,7 @@ public partial class NPC : Dynamic
 	public void SetNavDestination(Vector3 pos)
 	{
 		MoveTarget = null;
+		if (Character == null) return;
 		if (_navAgent == null)
 		{
 			_navAgentContainer = new();
@@ -357,12 +354,12 @@ public partial class NPC : Dynamic
 			{
 				PathDesiredDistance = NavigationDistance,
 				TargetDesiredDistance = 0.5f,
-				PathHeightOffset = -(CalculateBounds().Size.Y / 2),
+				PathHeightOffset = -(Character.CalculateBounds().Size.Y / 2),
 				PathMaxDistance = 3f
 			};
 
 			_navAgentContainer.AddChild(_navAgent);
-			GDNode3D.AddChild(_navAgentContainer);
+			Character.GDNode3D.AddChild(_navAgentContainer);
 			if (Globals.IsInGDEditor)
 			{
 				_navAgent.DebugEnabled = true;

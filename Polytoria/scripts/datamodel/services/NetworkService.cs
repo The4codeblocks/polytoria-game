@@ -686,7 +686,7 @@ public sealed partial class NetworkService : Instance
 
 		// Assign network authorties
 		plr.SetNetworkAuthority(peerID, true);
-		plr.NetTransformAuthority = peerID;
+		plr?.Character.NetTransformAuthority = peerID;
 		if (!_players.UseServerAuthority)
 		{
 			// Assign property ownership if server authority mode is off

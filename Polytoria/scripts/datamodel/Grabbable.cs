@@ -149,10 +149,11 @@ public partial class Grabbable : Instance
 	private async void OnClicked(Player by)
 	{
 		if (_dragger != null) return;
+		if (by.Character == null) return;
 		if (_parent != null)
 		{
 			// Check grabbable range
-			if ((by.Position - _parent.Position).Length() > MaxGrabbableRange) return;
+			if ((by.Character.Position - _parent.Position).Length() > MaxGrabbableRange) return;
 		}
 		if (Root.Network.IsServer)
 		{
@@ -282,8 +283,9 @@ public partial class Grabbable : Instance
 					}
 
 					if (targetPos == null) return;
+					if (_dragger.Character == null) return;
 
-					Vector3 anchorPos = _dragger.Position;
+					Vector3 anchorPos = _dragger.Character.Position;
 					Vector3 direction = targetPos.Value - anchorPos;
 					float distance = direction.Length();
 

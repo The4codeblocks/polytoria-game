@@ -12,6 +12,7 @@ using Polytoria.Networking;
 using Polytoria.Scripting;
 using Polytoria.Shared;
 using Polytoria.Utils;
+using Polytoria.Utils.DTOs;
 using System;
 //using System.Collections.Generic;
 
@@ -70,6 +71,9 @@ public partial class CharacterModel : Physical
 	private float _nametagVisibleRadius = 40;
 	private bool _useNametag = true;
 	private Nametag _nametag = null!;
+
+	protected override float PositionSyncThreshold => 0.1f;
+	protected override float RotationSyncThreshold => 1f;
 
 	// List of all emotes
 	public static readonly string[] EmoteList =
@@ -187,6 +191,12 @@ public partial class CharacterModel : Physical
 			InternalDetachTool();
 			tool.InvokeDropped();
 		}
+	}
+
+	internal override bool TransformNetworkCheck(TransformPayloadDto newTransform)
+	{
+		// TODO: Make sanity checks here
+		return true;
 	}
 
 	[ScriptMethod]
@@ -1171,12 +1181,16 @@ public partial class CharacterModel : Physical
 	public override void Process(double delta)
 	{
 		base.Process(delta);
-		if (_controller is Player plr && Root.Network.IsServer && !IsSitting && !plr.IsLocal)
+		if (_controller is Player plr && !plr.IsLocal)
 		{
-			CharBody3D.Velocity = LastVelocity;
-			CharBody3D.MoveAndSlide();
-			LastVelocity = Vector3.Zero;
-			ApplyPushForce();
+			UpdateTransformTick(delta);
+			if (Root.Network.IsServer && !IsSitting)
+			{
+				CharBody3D.Velocity = LastVelocity;
+				CharBody3D.MoveAndSlide();
+				LastVelocity = Vector3.Zero;
+				ApplyPushForce();
+			}
 		}
 	}
 

@@ -74,7 +74,7 @@ public partial class RendererViewport : SubViewport
 
 		NPC npc = Root.Insert.DefaultNPC();
 		npc.Parent = Root.Environment;
-		npc.GDNode3D.RotationDegrees = new(0, 15, 0);
+		npc.Character!.GDNode3D.RotationDegrees = new(0, 15, 0);
 		PolytorianModel ptm = (PolytorianModel)npc.Character!;
 		ptm.UseNametag = false;
 
