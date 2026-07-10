@@ -215,11 +215,6 @@ public partial class NPC : Instance
 	[ScriptProperty]
 	public PTSignal NavFinished { get; private set; } = new();
 
-	public override Node CreateGDNode()
-	{
-		return new CharacterBody3D() { FloorMaxAngle = Mathf.DegToRad(80f) };
-	}
-
 	public override void PreDelete()
 	{
 		_navAgent?.NavigationFinished -= OnNavFinished;

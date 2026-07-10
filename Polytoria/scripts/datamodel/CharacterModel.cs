@@ -355,6 +355,11 @@ public partial class CharacterModel : Physical
 	[ScriptProperty]
 	public bool IsOnCeiling => CharBody3D.IsOnCeiling();
 
+	public override Node CreateGDNode()
+	{
+		return new CharacterBody3D() { FloorMaxAngle = Mathf.DegToRad(80f) };
+	}
+
 	public override void InitGDNode()
 	{
 		CharBody3D = (CharacterBody3D)GDNode;

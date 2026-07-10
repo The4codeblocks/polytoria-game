@@ -290,12 +290,18 @@ public sealed partial class PolytorianModel : CharacterModel
 
 	public override Node CreateGDNode()
 	{
-		return Globals.LoadNetworkedObjectScene(ClassName)!;
+		if (GDNode != null) return GDNode;
+		Node? node = Globals.LoadNetworkedObjectScene(ClassName);
+		if (node != null)
+		{
+			return node;
+		}
+		return new();
 	}
 
 	public override void EnterTree()
 	{
-		if (Parent is Physical phy)
+		if (this is Physical phy)
 		{
 			_oldPhyParent = phy;
 
