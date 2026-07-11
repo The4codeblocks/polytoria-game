@@ -442,7 +442,7 @@ public partial class CharacterModel : Physical
 	public void ResetAppearance()
 	{
 		ClearAppearance();
-		if (_controller is Player plr && plr.AutoLoadAppearance)
+		if (Controller is Player plr && plr.AutoLoadAppearance)
 		{
 			if (Root.Entry != null && Root.Entry.IsSoloTest)
 			{
@@ -463,7 +463,7 @@ public partial class CharacterModel : Physical
 			Position = spawnpoint.Position + new Vector3(0, spawnpoint.Size.Y + 2.0f, 0);
 			Rotation = new(0, spawnpoint.Rotation.Y, 0);
 		}
-		else if (_controller is Player player)
+		else if (Controller is Player player)
 		{
 			Position = player.DefaultSpawnLocation;
 			Rotation = new(0, 0, 0);
@@ -471,7 +471,7 @@ public partial class CharacterModel : Physical
 
 		// Spawn at custom position
 #if CREATOR
-		if (_controller is Player plr)
+		if (Controller is Player plr)
 		{
 			if (Root.Entry != null && Root.Entry.DebugSpawnPos != null)
 			{
@@ -507,7 +507,7 @@ public partial class CharacterModel : Physical
 		get => _health;
 		set
 		{
-			if (_controller is Player plr && !plr.IsReady) return;
+			if (Controller is Player plr && !plr.IsReady) return;
 			_health = value;
 			if (_health <= 0 && !IsDead)
 			{
@@ -620,7 +620,7 @@ public partial class CharacterModel : Physical
 			return;
 		}
 
-		if (_controller is Player plr)
+		if (Controller is Player plr)
 		{
 			if (!plr.IsLocal)
 			{
@@ -648,7 +648,7 @@ public partial class CharacterModel : Physical
 				_timeSinceGrounded += (float)delta;
 			}
 
-			_controller?.Navigate(delta);
+			Controller?.Navigate(delta);
 
 			// Apply gravity
 			if (!isOnFloor)
@@ -668,7 +668,7 @@ public partial class CharacterModel : Physical
 			}
 
 			UpdateVelocityInternal(CharacterVelocity);
-			if (_controller is not Player)
+			if (Controller is not Player)
 			{
 				CharBody3D.Velocity = Velocity;
 				CharBody3D.MoveAndSlide();
@@ -1063,7 +1063,7 @@ public partial class CharacterModel : Physical
 		}
 		set
 		{
-			if (_controller is Player plr)
+			if (Controller is Player plr)
 			{
 				LastVelocity = value;
 			}
@@ -1090,15 +1090,15 @@ public partial class CharacterModel : Physical
 		SetAnimSpeed(1);
 	}
 
-	[ScriptProperty, SyncVar(AllowAuthorWrite = true)]
+	[Editable, ScriptProperty]
 	public NPC? Controller
 	{
 		get => _controller;
 		set
 		{
-			_controller?.Character = null;
+			_controller?._character = null;
 			_controller = value;
-			value?.Character = this;
+			value?._character = this;
 			OnPropertyChanged();
 		}
 	}
@@ -1149,7 +1149,7 @@ public partial class CharacterModel : Physical
 		OverridePhysicsProcess = true;
 
 		_bubbleChat = Globals.CreateInstanceFromScene<BubbleChat>(BubbleChatScene);
-		_bubbleChat.SetTarget(this._controller is Player plr ? plr : null);
+		_bubbleChat.SetTarget(this.Controller is Player plr ? plr : null);
 		_bubbleChat.Visible = _useBubbleChat;
 		GDNode.AddChild(_bubbleChat, @internal: Node.InternalMode.Back);
 		excludedBoundNodes.Add(_bubbleChat);
@@ -1186,7 +1186,7 @@ public partial class CharacterModel : Physical
 	public override void Process(double delta)
 	{
 		base.Process(delta);
-		if (_controller is Player plr && !plr.IsLocal)
+		if (Controller is Player plr && !plr.IsLocal)
 		{
 			UpdateTransformTick(delta);
 			if (Root.Network.IsServer && !IsSitting)
@@ -1203,7 +1203,7 @@ public partial class CharacterModel : Physical
 	{
 		UnequipTool();
 		Velocity = Vector3.Zero;
-		if (_controller is Player plr) plr.OnPlayerDied();
+		if (Controller is Player plr) plr.OnPlayerDied();
 	}
 
 	public override void InitOverrides()

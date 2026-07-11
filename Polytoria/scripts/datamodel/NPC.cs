@@ -18,7 +18,7 @@ public partial class NPC : Instance
 {
 	private const float NavigationDistance = 2f;
 	public const float BodyRotateLerp = 10f;
-	private CharacterModel? _character;
+	internal CharacterModel? _character;
 	private Dynamic? _moveTarget;
 
 	private string _displayName = "";
@@ -184,9 +184,9 @@ public partial class NPC : Instance
 		}
 		set
 		{
-			_character?.Controller = null;
+			_character?._controller = null;
 			_character = value;
-			value?.Controller = this;
+			value?._controller = this;
 			OnPropertyChanged();
 		}
 	}

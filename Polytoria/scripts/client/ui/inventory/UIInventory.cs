@@ -11,7 +11,7 @@ namespace Polytoria.Client.UI;
 public partial class UIInventory : Control
 {
 	public const int MaximumToolSlot = 6;
-	private Inventory _inventory = null!;
+	private Inventory? _inventory = null!;
 	private Player _localplr = null!;
 	private Control _layout = null!;
 	private readonly Dictionary<Tool, UIToolItem> _tools = [];
@@ -30,19 +30,18 @@ public partial class UIInventory : Control
 	public override void _Ready()
 	{
 		_localplr = World.Current!.Players.LocalPlayer;
-		_inventory = _localplr.Inventory;
+		_inventory = _localplr.Character?.Inventory;
 		_layout = GetNode<Control>("Layout");
-		_inventory.ChildAdded.Connect(OnChildEnterInventory);
-		_inventory.ChildRemoved.Connect(OnChildExitInventory);
-		_localplr.ChildAdded.Connect(OnChildEnterInventory);
-		_localplr.ChildRemoved.Connect(OnChildExitInventory);
-
 		PackedScene packed = GD.Load<PackedScene>("res://scenes/client/ui/inventory/slot_add_item.tscn");
 		_addSlotItemBtn = packed.Instantiate<UIToolAddItem>();
 		_addSlotItemBtn.Root = this;
 		_layout.AddChild(_addSlotItemBtn, false, InternalMode.Back);
 		_addSlotItemBtn.Visible = false;
 
+		if (_inventory is null) return;
+
+		_inventory.ChildAdded.Connect(OnChildEnterInventory);
+		_inventory.ChildRemoved.Connect(OnChildExitInventory);
 		foreach (Instance item in _inventory.GetChildren())
 		{
 			OnChildEnterInventory(item);
@@ -363,7 +362,7 @@ public partial class UIInventory : Control
 			await tool.TreeEntered.Wait();
 
 		// If the tool was reparented back to the player or their inventory, keep it
-		if (!tool.IsDeleted && (tool.Parent == _localplr || tool.Parent == _localplr.Inventory)) return;
+		if (!tool.IsDeleted && (tool.Parent is null || tool.Parent == _localplr.Character?.Inventory)) return;
 
 		if (_tools.TryGetValue(tool, out UIToolItem? toolItem))
 		{

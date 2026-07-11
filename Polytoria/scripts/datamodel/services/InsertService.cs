@@ -51,14 +51,14 @@ public sealed partial class InsertService : Instance
 
 		// Default character
 		var ptm = DefaultCharacter();
-		npc.Character = ptm;
 		ptm.Name = "Character";
-		ptm.Parent = npc;
 		ptm.LocalPosition = Vector3.Zero;
 		ptm.LocalRotation = Vector3.Zero;
 		ptm.LocalSize = Vector3.One;
 		ptm.SetNetworkAuthority(npc.NetworkAuthority, false);
 		ptm.Animator?.SetNetworkAuthority(owner, false);
+		ptm.Parent = npc;
+		npc.Character = ptm;
 
 		// Jump sound
 		BuiltInAudioAsset audio = New<BuiltInAudioAsset>();

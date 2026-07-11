@@ -250,13 +250,13 @@ public sealed partial class Tool : RigidBody
 	private void NetRecvActivate()
 	{
 		if (Holder == null) return;
-		if (Holder._controller == null) return;
+		if (Holder.Controller == null) return;
 
 		// Only allow from the holder
-		if (Holder._controller is Player plr && RemoteSenderId != plr.PeerID) return;
+		if (Holder.Controller is Player plr && RemoteSenderId != plr.PeerID) return;
 
 		// Only allow from server if is NPC
-		if (Holder._controller is not Player && RemoteSenderId != 1) return;
+		if (Holder.Controller is not Player && RemoteSenderId != 1) return;
 		Activated.Invoke();
 	}
 
@@ -264,13 +264,13 @@ public sealed partial class Tool : RigidBody
 	private void NetRecvDeactivate()
 	{
 		if (Holder == null) return;
-		if (Holder._controller == null) return;
+		if (Holder.Controller == null) return;
 
 		// Only allow from the holder
-		if (Holder._controller is Player plr && RemoteSenderId != plr.PeerID) return;
+		if (Holder.Controller is Player plr && RemoteSenderId != plr.PeerID) return;
 
 		// Only allow from server if is NPC
-		if (Holder._controller is not Player && RemoteSenderId != 1) return;
+		if (Holder.Controller is not Player && RemoteSenderId != 1) return;
 		Deactivated.Invoke();
 	}
 

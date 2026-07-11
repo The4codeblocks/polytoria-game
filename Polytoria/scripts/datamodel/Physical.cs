@@ -211,7 +211,7 @@ public partial class Physical : Dynamic
 		if (Root != null && Root.Network != null)
 		{
 			// Ignore player
-			if (Root.Network.IsServer && !(this is CharacterModel charModel && charModel._controller is Player))
+			if (Root.Network.IsServer && !(this is CharacterModel charModel && charModel.Controller is Player))
 			{
 				AutoUpdateNetTransform = finalVal;
 			}
@@ -241,7 +241,7 @@ public partial class Physical : Dynamic
 		if (!IsHidden)
 		{
 			// Stop collision override if player's not ready
-			if (this is CharacterModel charModel && charModel._controller is Player plr && !plr.IsReady) { return; }
+			if (this is CharacterModel charModel && charModel.Controller is Player plr && !plr.IsReady) { return; }
 			bool setTo = !_canCollide;
 
 #if CREATOR
@@ -298,7 +298,7 @@ public partial class Physical : Dynamic
 
 			if (this is CharacterModel charModel)
 			{
-				NPC? controller = charModel._controller;
+				NPC? controller = charModel.Controller;
 				if (controller is Player plr)
 				{
 					charModel.LastVelocity = _velocity;
@@ -1091,7 +1091,7 @@ public partial class Physical : Dynamic
 		NetworkedObject? hit = Root.GetNetObjectFromID(touchedBy);
 
 		// Only allow player hit invoke
-		if (hit != null && hit is CharacterModel charModel && charModel._controller is Player plr)
+		if (hit != null && hit is CharacterModel charModel && charModel.Controller is Player plr)
 		{
 			InternalInvokeClicked(plr);
 		}
@@ -1105,7 +1105,7 @@ public partial class Physical : Dynamic
 			// Ignore dead characters, their position could be inaccurate
 			if (charModel.IsDead) return;
 			// Ignore player that's not ready
-			if (charModel._controller is Player plr && !plr.IsReady) return;
+			if (charModel.Controller is Player plr && !plr.IsReady) return;
 		}
 
 		if (_touchContacts.TryGetValue(physical, out int count))
@@ -1121,7 +1121,7 @@ public partial class Physical : Dynamic
 	private void InternalInvokeTouchEnded(Physical physical)
 	{
 		// Ignore player that's not ready
-		if (physical is CharacterModel charModel && charModel._controller is Player plr && !plr.IsReady) return;
+		if (physical is CharacterModel charModel && charModel.Controller is Player plr && !plr.IsReady) return;
 
 		if (!_touchContacts.TryGetValue(physical, out int count))
 			return;

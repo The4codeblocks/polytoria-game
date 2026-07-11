@@ -92,7 +92,7 @@ public partial class Seat : Part
 		}
 		if (hit is CharacterModel charModel)
 		{
-			if (!(charModel._controller is Player ? CanPlayerSit : CanNPCSit)) { return; }
+			if (!(charModel.Controller is Player ? CanPlayerSit : CanNPCSit)) { return; }
 			if (charModel.IsSitting) { return; }
 			charModel.Sit(this);
 		}
