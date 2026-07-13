@@ -84,6 +84,9 @@ public sealed partial class Player : NPC
 	[ScriptProperty]
 	public PTSignal Respawned { get; private set; } = new();
 
+	[ScriptProperty]
+	public PTSignal<CharacterModel?> CharacterChanged { get; private set; } = new();
+
 	[SyncVar, ScriptProperty]
 	public int UserID
 	{
@@ -573,6 +576,7 @@ public sealed partial class Player : NPC
 		cam.UpdateCameraSelf = false;
 		cam.FirstPersonEntered.Connect(OnFirstPersonEntered);
 		cam.FirstPersonExited.Connect(OnFirstPersonExited);
+		CharacterChanged.Connect(OnCharacterChanged);
 
 		// Disable auto update, this will be updated manually
 		Character?.AutoUpdateNetTransform = false;
@@ -654,7 +658,7 @@ public sealed partial class Player : NPC
 	}
 
 	[ScriptMethod]
-	public new void Respawn()
+	public void Respawn()
 	{
 		InternalSpawn();
 	}
@@ -664,6 +668,17 @@ public sealed partial class Player : NPC
 		// Clear & Re-copy inventory
 		CopyInventory();
 
+		// Create character if absent
+		if (Character is null)
+		{
+			// Insert default character on client
+			if (Root.Network.NetworkMode == NetworkService.NetworkModeEnum.Client)
+			{
+				Root.Insert.InitializeDefaultNPC(this);
+			}
+
+			CharacterChanged.Invoke();
+		}
 		// Apply playerdefaults
 		if (Character != null)
 		{
@@ -749,14 +764,14 @@ public sealed partial class Player : NPC
 		if (_remoteCamAttach == null)
 		{
 			_remoteCamAttach = new();
-			Character?.GetAttachment(CharacterModel.CharacterAttachmentEnum.Head).GDNode.AddChild(_remoteCamAttach, @internal: Node.InternalMode.Back);
 		}
+		Character?.GetAttachment(CharacterModel.CharacterAttachmentEnum.Head).GDNode.AddChild(_remoteCamAttach, @internal: Node.InternalMode.Back);
 		_remoteCamAttach.RemotePath = _remoteCamAttach.GetPathTo(CamAttach.GDNode3D);
 
 		SetCamRemoteAttachEnabled(false);
 	}
 
-	internal void OnCharacterChange(CharacterModel? oldChar = null)
+	internal void OnCharacterChanged(CharacterModel? oldChar = null)
 	{
 		if (oldChar is PolytorianModel optc)
 		{

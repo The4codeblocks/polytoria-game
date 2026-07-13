@@ -12,8 +12,8 @@ public partial class UIInventory : Control
 {
 	public const int MaximumToolSlot = 6;
 	private Inventory? _inventory = null!;
+	private CharacterModel? _localchar = null!;
 	private Player _localplr = null!;
-	private CharacterModel _localchar = null!;
 	private Control _layout = null!;
 	private readonly Dictionary<Tool, UIToolItem> _tools = [];
 	private readonly List<Tool?> _toolSlot = [];
@@ -28,6 +28,53 @@ public partial class UIInventory : Control
 	public bool IsBackpackOpened = false;
 	public int CurrentSlotIndex = -1;
 
+	public void UpdateCharacter()
+	{
+		SetCharacter(_localplr.Character);
+	}
+
+	public void SetCharacter(CharacterModel? newchar)
+	{
+		if (newchar == _localchar) return;
+		if (_localchar is not null)
+		{
+			_localchar.ChildAdded.Disconnect(OnChildEnterInventory);
+			_localchar.ChildRemoved.Disconnect(OnChildExitInventory);
+		}
+		_localchar = newchar;
+		if (newchar is not null)
+		{
+			newchar.ChildAdded.Connect(OnChildEnterInventory);
+			newchar.ChildRemoved.Connect(OnChildExitInventory);
+		}
+
+		SetInventory(newchar?.Inventory);
+	}
+
+	public void SetInventory(Inventory? newinv)
+	{
+		if (newinv == _inventory) return;
+		if (_inventory is not null)
+		{
+			_inventory.ChildAdded.Disconnect(OnChildEnterInventory);
+			_inventory.ChildRemoved.Disconnect(OnChildExitInventory);
+			foreach (Instance item in _inventory.GetChildren())
+			{
+				OnChildExitInventory(item);
+			}
+		}
+		_inventory = newinv;
+		if (newinv is not null)
+		{
+			newinv.ChildAdded.Connect(OnChildEnterInventory);
+			newinv.ChildRemoved.Connect(OnChildExitInventory);
+			foreach (Instance item in newinv.GetChildren())
+			{
+				OnChildEnterInventory(item);
+			}
+		}
+	}
+
 	public override void _Ready()
 	{
 		_localplr = World.Current!.Players.LocalPlayer;
@@ -38,21 +85,8 @@ public partial class UIInventory : Control
 		_layout.AddChild(_addSlotItemBtn, false, InternalMode.Back);
 		_addSlotItemBtn.Visible = false;
 
-		_localchar = _localplr.Character!;
-		if (_localchar is null) return;
-
-		_localchar.ChildAdded.Connect(OnChildEnterInventory);
-		_localchar.ChildRemoved.Connect(OnChildExitInventory);
-
-		_inventory = _localchar.Inventory;
-		if (_inventory is null) return;
-
-		_inventory.ChildAdded.Connect(OnChildEnterInventory);
-		_inventory.ChildRemoved.Connect(OnChildExitInventory);
-		foreach (Instance item in _inventory.GetChildren())
-		{
-			OnChildEnterInventory(item);
-		}
+		UpdateCharacter();
+		_localplr.CharacterChanged.Connect(UpdateCharacter);
 	}
 
 	public void ToggleBackpack()
@@ -369,7 +403,7 @@ public partial class UIInventory : Control
 			await tool.TreeEntered.Wait();
 
 		// If the tool was reparented back to the player or their inventory, keep it
-		if (!tool.IsDeleted && (tool.Parent is null || tool.Parent == _localplr.Character?.Inventory)) return;
+		if (!tool.IsDeleted && (tool.Parent is null || tool.Parent == _inventory || tool.Parent == _localchar)) return;
 
 		if (_tools.TryGetValue(tool, out UIToolItem? toolItem))
 		{

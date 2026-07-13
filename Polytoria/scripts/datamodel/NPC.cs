@@ -212,7 +212,7 @@ public partial class NPC : Instance
 			value?.OnPropertyChanged();
 			if (this is Player mplr)
 			{
-				mplr.OnCharacterChange(oldChar);
+				mplr.CharacterChanged.Invoke(oldChar);
 			}
 		}
 	}

@@ -950,18 +950,25 @@ public partial class CharacterModel : Physical
 	[ScriptMethod]
 	public void Respawn()
 	{
-		Health = MaxHealth;
-		Anchored = false;
-		IsDead = false;
-
-		if (this is PolytorianModel ptmodel)
+		if (Controller is Player plr)
 		{
-			ptmodel.StopRagdoll();
+			plr.Respawn();
 		}
-		CharacterVelocity = Vector3.Zero;
+		else
+		{
+			Health = MaxHealth;
+			Anchored = false;
+			IsDead = false;
 
-		OverrideCanCollide = false;
-		UpdateCollision();
+			if (this is PolytorianModel ptmodel)
+			{
+				ptmodel.StopRagdoll();
+			}
+			CharacterVelocity = Vector3.Zero;
+
+			OverrideCanCollide = false;
+			UpdateCollision();
+		}
 	}
 
 	[ScriptMethod]
@@ -1182,6 +1189,7 @@ public partial class CharacterModel : Physical
 		ChildAdded.Connect(OnChildAdded);
 		ChildRemoved.Connect(OnChildRemoved);
 		Died.Connect(OnDied);
+		Destroying.Connect(OnDestroying);
 
 		RecalculateNametagOffset();
 
@@ -1192,6 +1200,14 @@ public partial class CharacterModel : Physical
 		{
 			_peerReadySubscribed = true;
 			Root.Network.PeerPreInit += OnPeerPreInit;
+		}
+	}
+
+	public void OnDestroying()
+	{
+		if (Controller is Player plr)
+		{
+			plr.Character = null;
 		}
 	}
 
