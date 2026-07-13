@@ -301,28 +301,25 @@ public sealed partial class PolytorianModel : CharacterModel
 
 	public override void EnterTree()
 	{
-		if (this is Physical phy)
+		_oldPhyParent = this;
+
+		// Configure default collision shape for PolytorianModel
+		CollisionPivot = new()
 		{
-			_oldPhyParent = phy;
+			Scale = NodeSize
+		};
+		CollisionShape = new()
+		{
+			Shape = _collisionBox
+		};
+		Physical.SetRemoteLinkOffset(CollisionShape, new(0, 3f - 0.1f, 0));
+		Physical.SetRemoteLinkTarget(CollisionShape, CollisionPivot);
+		GDNode.AddChild(CollisionPivot);
+		CollisionPivot.Position = new(0, -3f, 0);
 
-			// Configure default collision shape for PolytorianModel
-			CollisionPivot = new()
-			{
-				Scale = NodeSize
-			};
-			CollisionShape = new()
-			{
-				Shape = _collisionBox
-			};
-			Physical.SetRemoteLinkOffset(CollisionShape, new(0, 3f - 0.1f, 0));
-			Physical.SetRemoteLinkTarget(CollisionShape, CollisionPivot);
-			GDNode.AddChild(CollisionPivot);
-			CollisionPivot.Position = new(0, -3f, 0);
-
-			phy.GDNode.AddChild(CollisionShape);
-			phy.AddCollisionShape(CollisionShape);
-			phy.UpdateCollision();
-		}
+		GDNode.AddChild(CollisionShape);
+		AddCollisionShape(CollisionShape);
+		UpdateCollision();
 		base.EnterTree();
 	}
 

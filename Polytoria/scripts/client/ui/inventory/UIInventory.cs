@@ -13,6 +13,7 @@ public partial class UIInventory : Control
 	public const int MaximumToolSlot = 6;
 	private Inventory? _inventory = null!;
 	private Player _localplr = null!;
+	private CharacterModel _localchar = null!;
 	private Control _layout = null!;
 	private readonly Dictionary<Tool, UIToolItem> _tools = [];
 	private readonly List<Tool?> _toolSlot = [];
@@ -30,7 +31,6 @@ public partial class UIInventory : Control
 	public override void _Ready()
 	{
 		_localplr = World.Current!.Players.LocalPlayer;
-		_inventory = _localplr.Character?.Inventory;
 		_layout = GetNode<Control>("Layout");
 		PackedScene packed = GD.Load<PackedScene>("res://scenes/client/ui/inventory/slot_add_item.tscn");
 		_addSlotItemBtn = packed.Instantiate<UIToolAddItem>();
@@ -38,6 +38,13 @@ public partial class UIInventory : Control
 		_layout.AddChild(_addSlotItemBtn, false, InternalMode.Back);
 		_addSlotItemBtn.Visible = false;
 
+		_localchar = _localplr.Character!;
+		if (_localchar is null) return;
+
+		_localchar.ChildAdded.Connect(OnChildEnterInventory);
+		_localchar.ChildRemoved.Connect(OnChildExitInventory);
+
+		_inventory = _localchar.Inventory;
 		if (_inventory is null) return;
 
 		_inventory.ChildAdded.Connect(OnChildEnterInventory);

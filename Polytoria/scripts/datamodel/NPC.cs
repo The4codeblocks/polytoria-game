@@ -184,10 +184,36 @@ public partial class NPC : Instance
 		}
 		set
 		{
-			_character?._controller = null;
+			bool isServer = Root.Network.IsServer;
+			CharacterModel? oldChar = Character;
+			if (isServer)
+			{
+				if (this is Player plr)
+				{
+					oldChar?.SetNetworkAuthority(null);
+					oldChar?.SetNetworkAuthority(1, true);
+					value?.SetNetworkAuthority(plr);
+					value?.SetNetworkAuthority(plr.PeerID, true);
+					value?.SetPhysicsProcess(true);
+				}
+				else if (((value?.NetworkAuthority ?? 1) != 1))
+				{
+					value?.SetNetworkAuthority(null);
+					value?.SetNetworkAuthority(1, true);
+				}
+			}
+			Character?._controller = null;
+			Character?.OnPropertyChanged();
 			_character = value;
-			value?._controller = this;
 			OnPropertyChanged();
+			value?.Controller?._character = null;
+			value?.Controller?.OnPropertyChanged();
+			value?._controller = this;
+			value?.OnPropertyChanged();
+			if (this is Player mplr)
+			{
+				mplr.OnCharacterChange(oldChar);
+			}
 		}
 	}
 
@@ -248,7 +274,7 @@ public partial class NPC : Instance
 
 		if (walkTarget.HasValue)
 		{
-			Vector3 velo = Character.GetGlobalPosition().DirectionTo(walkTarget.Value with { Y = Character.Position.Y });
+			Vector3 velo = Character!.GetGlobalPosition().DirectionTo(walkTarget.Value with { Y = Character.Position.Y });
 			Character.CharacterVelocity = new(velo.X * Character.WalkSpeed, Character.CharacterVelocity.Y, velo.Z * Character.WalkSpeed);
 			Character.GDNode3D.GlobalRotationDegrees = new Vector3(Character.Rotation.X, Mathf.RadToDeg(Mathf.LerpAngle(Mathf.DegToRad(Character.Rotation.Y), Mathf.Atan2(Character.CharacterVelocity.X, Character.CharacterVelocity.Z), MathUtils.ExpDecay((float)delta, BodyRotateLerp))), Character.Rotation.Z);
 
@@ -263,7 +289,7 @@ public partial class NPC : Instance
 		}
 		else if (this is not Player || playerNPCOverride)
 		{
-			Character.CharacterVelocity = new(0, Character.CharacterVelocity.Y, 0);
+			Character!.CharacterVelocity = new(0, Character.CharacterVelocity.Y, 0);
 		}
 
 		if (!isOnFloor)
@@ -273,8 +299,8 @@ public partial class NPC : Instance
 
 		if (this is not Player || playerNPCOverride)
 		{
-			Character.SetState(finalState);
-			Character.SetAnimSpeed(animSpeed);
+			Character!.SetState(finalState);
+			Character!.SetAnimSpeed(animSpeed);
 		}
 	}
 

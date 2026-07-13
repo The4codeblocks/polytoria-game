@@ -124,7 +124,7 @@ public sealed partial class Tool : RigidBody
 
 	private void OnToolTouched(Physical physical)
 	{
-		if (physical is CharacterModel charModel && _holder == null && Parent is not (Inventory or Player) && _equipTimer.IsStopped())
+		if (physical is CharacterModel charModel && _holder == null && Parent is not (Inventory or CharacterModel) && _equipTimer.IsStopped())
 		{
 			charModel.EquipTool(this);
 		}

@@ -684,27 +684,26 @@ public sealed partial class NetworkService : Instance
 			plr.ChatColor = Root.PlayerDefaults.ChatColor;
 		}
 
-		// Assign network authorties
-		plr.SetNetworkAuthority(peerID, true);
-		plr.Character?.NetTransformAuthority = peerID;
-		if (!_players.UseServerAuthority)
-		{
-			// Assign property ownership if server authority mode is off
-			plr.NetPropAuthority = peerID;
-		}
-
 		// Insert default character on client
 		if (NetworkMode == NetworkModeEnum.Client)
 		{
 			Root.Insert.InitializeDefaultNPC(plr);
 		}
 
+		// Assign network authorties
+		plr.SetNetworkAuthority(peerID, true);
+		plr.Character?.SetNetworkAuthority(plr);
+		plr.Character?.SetNetworkAuthority(peerID, true);
+		if (!_players.UseServerAuthority)
+		{
+			// Assign property ownership if server authority mode is off
+			plr.NetPropAuthority = peerID;
+			plr.Character?.NetPropAuthority = peerID;
+		}
+
 		plr.Parent = _players;
 
-		if (plr.Character != null)
-		{
-			plr.Character.Anchored = true;
-		}
+		plr.Character?.Anchored = true;
 		plr.IsReady = false;
 
 		// Copy instances from player default
@@ -899,10 +898,7 @@ public sealed partial class NetworkService : Instance
 			if (IsServer)
 			{
 				plr.IsReady = true;
-				if (plr.Character != null)
-				{
-					plr.Character.Anchored = true;
-				}
+				plr.Character?.Anchored = true;
 				plr.Respawn();
 				Root.Players.InvokePlayerAdded(plr);
 				RpcId(peerID, nameof(NetRecvReportReady));

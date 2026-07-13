@@ -593,7 +593,7 @@ public partial class CharacterModel : Physical
 		// Only enable physics in client mode
 		if (Root.SessionType != World.SessionTypeEnum.Client) return;
 
-		// Kill player if fall off the map
+		// Kill character if fall off the map
 		if (Position.Y < Root.Environment.PartDestroyHeight)
 		{
 			Kill();
@@ -1096,10 +1096,22 @@ public partial class CharacterModel : Physical
 		get => _controller;
 		set
 		{
-			_controller?._character = null;
-			_controller = value;
-			value?._character = this;
-			OnPropertyChanged();
+			if (value is null)
+			{
+				Controller?._character = null;
+				Controller?.OnPropertyChanged();
+				_controller = null;
+				OnPropertyChanged();
+				if (Root.Network.IsServer && ((value?.NetworkAuthority ?? 1) != 1))
+				{
+					SetNetworkAuthority(null);
+					SetNetworkAuthority(1, true);
+				}
+			}
+			else
+			{
+				value!.Character = this;
+			}
 		}
 	}
 

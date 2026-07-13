@@ -57,7 +57,7 @@ public sealed partial class InsertService : Instance
 		ptm.LocalSize = Vector3.One;
 		ptm.SetNetworkAuthority(npc.NetworkAuthority, false);
 		ptm.Animator?.SetNetworkAuthority(owner, false);
-		ptm.Parent = npc;
+		ptm.Parent = Root.Environment;
 		npc.Character = ptm;
 
 		// Jump sound
@@ -65,7 +65,7 @@ public sealed partial class InsertService : Instance
 		audio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.Jump;
 		var jumpSound = New<Sound>();
 		jumpSound.Name = "JumpSound";
-		jumpSound.Parent = npc;
+		jumpSound.Parent = ptm;
 		jumpSound.Volume = 0.5f;
 		jumpSound.Audio = audio;
 		jumpSound.Autoplay = false;

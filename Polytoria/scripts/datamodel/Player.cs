@@ -287,15 +287,19 @@ public sealed partial class Player : NPC
 
 	public override void Init()
 	{
+		// Force these to always be on
+		SetProcess(true);
+		SetPhysicsProcess(true);
 		base.Init();
 
 		Root.Input.GodotInputEvent += OnInput;
 
-		if (Root.SessionType == World.SessionTypeEnum.Client && Root.Network.IsServer)
+		if (Root.SessionType == World.SessionTypeEnum.Client && Root.Network.IsServer && Character is not null)
 		{
 			Inventory inventory = Globals.LoadInstance<Inventory>(Root);
 			inventory.NameOverride = "Inventory";
 			inventory.NetworkParent = this;
+			Character.Inventory = inventory;
 		}
 
 		Root.Players.PropertyChanged.Connect(OnPlayersPropertyChanged);
@@ -403,6 +407,10 @@ public sealed partial class Player : NPC
 	public override void PhysicsProcess(double delta)
 	{
 		if (Root.SessionType != World.SessionTypeEnum.Client || !IsLocal || !IsReady || Character == null) { return; }
+
+		// not ideal TODO: have this only run when needed
+		Character.SetPhysicsProcess(true);
+		Character.NetworkAuthority = Root.Network.LocalPeerID;
 
 		if (Character is PolytorianModel pt && pt.Ragdolling)
 		{
@@ -550,7 +558,7 @@ public sealed partial class Player : NPC
 
 		CamAttach = Globals.LoadInstance<Dynamic>(Root);
 		CamAttach.Name = "CameraAttachment";
-		CamAttach.Parent = this;
+		CamAttach.Parent = Character;
 		CamAttach.AutoUpdateNetTransform = false;
 
 		_remoteCamAttach = new();
@@ -695,7 +703,7 @@ public sealed partial class Player : NPC
 		if (Character == null) return;
 		if (Character.Inventory == null) return;
 
-		if (Character.KeepInventory)
+		if (!Character.KeepInventory)
 		{
 			foreach (Instance item in Character.Inventory.GetChildren())
 			{
@@ -724,6 +732,47 @@ public sealed partial class Player : NPC
 		Character?.OverrideCanCollide = false;
 		Character?.UpdateCollision();
 		Character?.IsDead = false;
+
+		UpdateCamAttach();
+	}
+
+	internal void UpdateCamAttach()
+	{
+		if (CamAttach == null || CamAttach.DeletedAsChild)
+		{
+			CamAttach = Globals.LoadInstance<Dynamic>(Root);
+			CamAttach.Name = "CameraAttachment";
+			CamAttach.AutoUpdateNetTransform = false;
+		}
+		CamAttach.Parent = Character;
+
+		if (_remoteCamAttach == null)
+		{
+			_remoteCamAttach = new();
+			Character?.GetAttachment(CharacterModel.CharacterAttachmentEnum.Head).GDNode.AddChild(_remoteCamAttach, @internal: Node.InternalMode.Back);
+		}
+		_remoteCamAttach.RemotePath = _remoteCamAttach.GetPathTo(CamAttach.GDNode3D);
+
+		SetCamRemoteAttachEnabled(false);
+	}
+
+	internal void OnCharacterChange(CharacterModel? oldChar = null)
+	{
+		if (oldChar is PolytorianModel optc)
+		{
+			optc.RagdollStarted.Disconnect(OnRagdollStarted);
+			optc.RagdollStopped.Disconnect(OnRagdollStopped);
+		}
+		if (Character is PolytorianModel ptc)
+		{
+			ptc.RagdollStarted.Connect(OnRagdollStarted);
+			ptc.RagdollStopped.Connect(OnRagdollStopped);
+		}
+		UpdateCamAttach();
+		oldChar?.AutoUpdateNetTransform = true;
+		// Disable auto update, this will be updated manually
+		Character?.AutoUpdateNetTransform = false;
+		UpdatePlayerCollision();
 	}
 
 	internal void AdminKick()
