@@ -77,8 +77,9 @@ public class DefaultMovement : IPlayerMovement
 
 	public void ProcessInput(InputSnapshot snapshot)
 	{
-		CharacterModel TargetCharacter = Target.Character;
 		if (Target == null) return;
+		CharacterModel TargetCharacter = Target.Character!;
+		if (TargetCharacter == null) return;
 
 		bool isOnFloor = TargetCharacter.CharBody3D.IsOnFloor();
 		CharacterModel.CharacterModelStateEnum finalState = CharacterModel.CharacterModelStateEnum.Idle;

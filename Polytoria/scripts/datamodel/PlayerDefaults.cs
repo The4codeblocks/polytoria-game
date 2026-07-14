@@ -23,6 +23,7 @@ public sealed partial class PlayerDefaults : HiddenBase
 	private bool _useStamina;
 	private float _staminaRegen;
 	private float _staminaBurn;
+	private bool _reuseCharacter;
 	private bool _keepInventory;
 	private bool _useHeadTurning;
 	private bool _useBubbleChat;
@@ -182,6 +183,18 @@ public sealed partial class PlayerDefaults : HiddenBase
 
 
 	[Editable, ScriptProperty]
+	public bool ReuseCharacter
+	{
+		get => _reuseCharacter;
+		set
+		{
+			_reuseCharacter = value;
+			OnPropertyChanged();
+		}
+	}
+
+
+	[Editable, ScriptProperty]
 	public bool KeepInventory
 	{
 		get => _keepInventory;
@@ -276,6 +289,7 @@ public sealed partial class PlayerDefaults : HiddenBase
 		UseBubbleChat = true;
 		AutoLoadAppearance = true;
 		LoadAppearanceTools = true;
+		ReuseCharacter = true;
 		MovementMode = Player.PlayerMovementModeEnum.Default;
 	}
 }

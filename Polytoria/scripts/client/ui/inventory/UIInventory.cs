@@ -60,7 +60,7 @@ public partial class UIInventory : Control
 			_inventory.ChildRemoved.Disconnect(OnChildExitInventory);
 			foreach (Instance item in _inventory.GetChildren())
 			{
-				OnChildExitInventory(item);
+				if (item is Tool tool) ForceRemoveTool(tool);
 			}
 		}
 		_inventory = newinv;
@@ -396,15 +396,8 @@ public partial class UIInventory : Control
 		_backpackNoneView.Visible = _backpackSlot.Count == 0;
 	}
 
-	private async void RemoveTool(Tool tool)
+	private void ForceRemoveTool(Tool tool)
 	{
-		// Wait for tool to enter another tree first
-		if (!tool.IsDeleted)
-			await tool.TreeEntered.Wait();
-
-		// If the tool was reparented back to the player or their inventory, keep it
-		if (!tool.IsDeleted && (tool.Parent is null || tool.Parent == _inventory || tool.Parent == _localchar)) return;
-
 		if (_tools.TryGetValue(tool, out UIToolItem? toolItem))
 		{
 			_tools.Remove(tool);
@@ -418,9 +411,21 @@ public partial class UIInventory : Control
 		}
 	}
 
+	private async void RemoveTool(Tool tool)
+	{
+		// Wait for tool to enter another tree first
+		if (!tool.IsDeleted)
+			await tool.TreeEntered.Wait();
+
+		// If the tool was reparented back to the player or their inventory, keep it
+		if (!tool.IsDeleted && (tool.Parent is null || tool.Parent == _inventory || tool.Parent == _localchar)) return;
+
+		ForceRemoveTool(tool);
+	}
+
 	private void EquipSlot(int index)
 	{
-		CharacterModel charModel = _localplr.Character;
+		CharacterModel charModel = _localplr.Character!;
 		if (charModel == null) return;
 		Tool? oldTool = charModel.HoldingTool;
 		if (charModel.HoldingTool != null)

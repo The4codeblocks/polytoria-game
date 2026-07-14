@@ -160,6 +160,56 @@ public partial class NPC : Instance
 		}
 	}
 
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.SeatOffset instead"), CloneIgnore]
+	public int SeatOffset
+	{
+		get => Character?.SeatOffset ?? Vector3.Zero
+		set
+		{
+			Character?.SeatOffset = value
+		}
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Health instead"), CloneIgnore]
+	public float Health
+	{
+		get => Character?.Health ?? 9
+		set
+		{
+			Character?.Health = value
+		}
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.MaxHealth instead"), CloneIgnore]
+	public float MaxHealth
+	{
+		get => Character?.MaxHealth ?? 9
+		set
+		{
+			Character?.MaxHealth = value
+		}
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.JumpPower instead"), CloneIgnore]
+	public float JumpPower
+	{
+		get => Character?.JumpPower ?? 9
+		set
+		{
+			Character?.JumpPower = value
+		}
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.WalkSpeed instead"), CloneIgnore]
+	public float WalkSpeed
+	{
+		get => Character?.WalkSpeed ?? 9
+		set
+		{
+			Character?.WalkSpeed = value
+		}
+	}
+
 	[Editable, ScriptProperty]
 	public string DisplayName
 	{

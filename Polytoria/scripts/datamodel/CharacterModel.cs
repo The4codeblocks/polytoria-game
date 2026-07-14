@@ -328,6 +328,10 @@ public partial class CharacterModel : Physical
 		set
 		{
 			_inventory = value;
+			if (Controller is Player plr && plr.IsLocal)
+			{
+				Root.CoreUI.CoreUI.Inventory.SetInventory(value);
+			}
 			OnPropertyChanged();
 		}
 	}

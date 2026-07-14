@@ -297,14 +297,6 @@ public sealed partial class Player : NPC
 
 		Root.Input.GodotInputEvent += OnInput;
 
-		if (Root.SessionType == World.SessionTypeEnum.Client && Root.Network.IsServer && Character is not null)
-		{
-			Inventory inventory = Globals.LoadInstance<Inventory>(Root);
-			inventory.NameOverride = "Inventory";
-			inventory.NetworkParent = this;
-			Character.Inventory = inventory;
-		}
-
 		Root.Players.PropertyChanged.Connect(OnPlayersPropertyChanged);
 	}
 
@@ -665,20 +657,32 @@ public sealed partial class Player : NPC
 
 	private void InternalSpawn()
 	{
-		// Clear & Re-copy inventory
-		CopyInventory();
-
 		// Create character if absent
-		if (Character is null)
+		if (Character is null || !Root.PlayerDefaults.ReuseCharacter)
 		{
 			// Insert default character on client
 			if (Root.Network.NetworkMode == NetworkService.NetworkModeEnum.Client)
 			{
-				Root.Insert.InitializeDefaultNPC(this);
+				Character = Root.Insert.DefaultNPCCharacter();
+				// Create inventory
+				if (Root.Network.IsServer && Character is not null)
+				{
+					Inventory? inv = this.FindChild<Inventory>("Inventory");
+					if (inv is null)
+					{
+						Inventory inventory = Globals.LoadInstance<Inventory>(Root);
+						inventory.NameOverride = "Inventory";
+						inventory.NetworkParent = this;
+						Character.Inventory = inventory;
+					}
+					else
+					{
+						Character.Inventory = inv;
+					}
+				}
 			}
-
-			CharacterChanged.Invoke();
 		}
+
 		// Apply playerdefaults
 		if (Character != null)
 		{
@@ -707,6 +711,9 @@ public sealed partial class Player : NPC
 		RespawnTime = Root.PlayerDefaults.RespawnTime;
 		AutoLoadAppearance = Root.PlayerDefaults.AutoLoadAppearance;
 		MovementMode = Root.PlayerDefaults.MovementMode;
+
+		// Clear & Re-copy inventory
+		CopyInventory();
 
 		Rpc(nameof(NetRespawned));
 	}
@@ -760,6 +767,7 @@ public sealed partial class Player : NPC
 			CamAttach.AutoUpdateNetTransform = false;
 		}
 		CamAttach.Parent = Character;
+		CamAttach.LocalPosition = new Vector3(0, CameraHeight, 0);
 
 		if (_remoteCamAttach == null)
 		{
