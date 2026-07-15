@@ -173,7 +173,7 @@ public partial class NPC : Instance
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Health instead"), CloneIgnore]
 	public float Health
 	{
-		get => Character?.Health ?? 9
+		get => Character?.Health ?? 0
 		set
 		{
 			Character?.Health = value
@@ -183,7 +183,7 @@ public partial class NPC : Instance
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.MaxHealth instead"), CloneIgnore]
 	public float MaxHealth
 	{
-		get => Character?.MaxHealth ?? 9
+		get => Character?.MaxHealth ?? 0
 		set
 		{
 			Character?.MaxHealth = value
@@ -193,7 +193,7 @@ public partial class NPC : Instance
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.JumpPower instead"), CloneIgnore]
 	public float JumpPower
 	{
-		get => Character?.JumpPower ?? 9
+		get => Character?.JumpPower ?? 0
 		set
 		{
 			Character?.JumpPower = value
@@ -203,11 +203,554 @@ public partial class NPC : Instance
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.WalkSpeed instead"), CloneIgnore]
 	public float WalkSpeed
 	{
-		get => Character?.WalkSpeed ?? 9
+		get => Character?.WalkSpeed ?? 0
 		set
 		{
 			Character?.WalkSpeed = value
 		}
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.JumpSound instead"), CloneIgnore]
+	public Sound? JumpSound
+	{
+		get => Character?.JumpSound
+		set
+		{
+			Character?.JumpSound = value
+		}
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.IsDead instead"), CloneIgnore]
+	public bool IsDead
+	{
+		get => Character?.IsDead ?? true
+		set
+		{
+			Character?.IsDead = value
+		}
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.SittingIn instead"), CloneIgnore]
+	public Seat? SittingIn
+	{
+		get => Character?.SittingIn
+		set
+		{
+			Character?.SittingIn = value
+		}
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.HoldingTool instead"), CloneIgnore]
+	public Tool? HoldingTool
+	{
+		get => Character?.HoldingTool
+		set
+		{
+			Character?.HoldingTool = value
+		}
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.Sit() instead")]
+	public void Sit(Seat value)
+	{
+		Character?.Sit(value);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.Unsit() instead")]
+	public void Unsit(bool? value)
+	{
+		Character?.Unsit(value);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.EquipTool() instead")]
+	public void EquipTool(Tool value)
+	{
+		Character?.EquipTool(value);
+	}
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.CollisionLayers instead")]
+	public uint CollisionLayers
+	{
+		get => Character?.CollisionLayers ?? 0;
+		set
+		{
+			Character?.CollisionLayers = value;
+		}
+	}
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.CollisionMask instead")]
+	public uint CollisionMask
+	{
+		get => Character?.CollisionMask ?? 0;
+		set
+		{
+			Character?.CollisionMask = value;
+		}
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.SetCollisionLayer() instead")]
+	public void SetCollisionLayer(int layer, bool value)
+	{
+		Character?.SetCollisionLayer(layer, value);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.SetCollisionMask() instead")]
+	public void SetCollisionMask(int layer, bool value)
+	{
+		Character?.SetCollisionMask(layer, value);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.GetCollisionLayer() instead")]
+	public bool GetCollisionLayer(int layer)
+	{
+		return Character?.GetCollisionLayer(layer) ?? false;
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.GetCollisionMask() instead")]
+	public bool GetCollisionMask(int layer)
+	{
+		return Character?.GetCollisionMask(layer) ?? false;
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.GetTouching() instead")]
+	public Physical[] GetTouching()
+	{
+		return Character?.GetTouching() ?? [];
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.AddForce() instead")]
+	public void AddForce(Vector3 force, ForceModeEnum mode = ForceModeEnum.Force)
+	{
+		Character?.AddForce(force, mode);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.AddTorque() instead")]
+	public void AddTorque(Vector3 force, ForceModeEnum mode = ForceModeEnum.Force)
+	{
+		Character?.AddTorque(force, mode);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.AddForceAtPosition() instead")]
+	public void AddForceAtPosition(Vector3 force, Vector3 position, ForceModeEnum mode = ForceModeEnum.Force)
+	{
+		Character?.AddForceAtPosition(force, position, mode);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.AddRelativeForce() instead")]
+	public void AddRelativeForce(Vector3 force, ForceModeEnum mode = ForceModeEnum.Force)
+	{
+		Character?.AddRelativeForce(force, mode);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.AddRelativeTorque() instead")]
+	public void AddRelativeTorque(Vector3 torque, ForceModeEnum mode = ForceModeEnum.Force)
+	{
+		Character?.AddRelativeTorque(torque, mode);
+	}
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.Forward instead")] public Vector3 Forward => Character?.Forward ?? Vector3.Zero;
+	[ScriptProperty, Attributes.Obsolete("Use Character.Right instead")] public Vector3 Right => Character?.Right ?? Vector3.Zero;
+	[ScriptProperty, Attributes.Obsolete("Use Character.Up instead")] public Vector3 Up => Character?.Up ?? Vector3.Zero;
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.GetBounds() instead")]
+	public Aabb? GetBounds()
+	{
+		return Character?.GetBounds();
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.RotateAround() instead")]
+	public void RotateAround(Vector3 point, Vector3 axis, float angle)
+	{
+		Character?.RotateAround(point, axis, angle);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.LookAt() instead")]
+	public void LookAt(object target)
+	{
+		Character?.LookAt(target);
+	}
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.LookAt() instead")]
+	public void LookAt(object target, Vector3 up)
+	{
+		Character?.LookAt(target, up);
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.UseNametag instead"), CloneIgnore]
+	public bool? UseNametag
+	{
+		get => Character?.UseNametag ?? false;
+		set
+		{
+			Character?.UseNametag = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.NametagOffset instead"), CloneIgnore]
+	public Vector3? NametagOffset
+	{
+		get => Character?.NametagOffset ?? Vector3.Zero;
+		set
+		{
+			Character?.NametagOffset = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.NametagVisibleRadius instead"), CloneIgnore]
+	public float? NametagVisibleRadius
+	{
+		get => Character?.NametagVisibleRadius ?? 0;
+		set
+		{
+			Character?.NametagVisibleRadius = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.IsSitting instead"), CloneIgnore]
+	public bool? IsSitting
+	{
+		get => Character?.IsSitting ?? false;
+		set
+		{
+			Character?.IsSitting = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Position instead"), CloneIgnore]
+	public Vector3? Position
+	{
+		get => Character?.Position ?? Vector3.Zero;
+		set
+		{
+			Character?.Position = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.IsOnGround instead"), CloneIgnore]
+	public bool? IsOnGround
+	{
+		get => Character?.IsOnGround ?? false;
+		set
+		{
+			Character?.IsOnGround = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.IsOnCeiling instead"), CloneIgnore]
+	public bool? IsOnCeiling
+	{
+		get => Character?.IsOnCeiling ?? false;
+		set
+		{
+			Character?.IsOnCeiling = value
+		}
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.Kill() instead")]
+	public void Kill()
+	{
+		Character?.Kill();
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.TryStepUp() instead")]
+	public bool? TryStepUp()
+	{
+		return Character?.TryStepUp() ?? false;
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.Jump() instead")]
+	public void Jump()
+	{
+		Character?.Jump();
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.DropTool() instead")]
+	public void DropTool()
+	{
+		Character?.DropTool();
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.LoadAppearance() instead")]
+	public void LoadAppearance(int value)
+	{
+		Character?.LoadAppearance(value);
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.ClearAppearance() instead")]
+	public void ClearAppearance()
+	{
+		Character?.ClearAppearance();
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.Respawn() instead")]
+	public void Respawn()
+	{
+		Character?.Respawn();
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.TakeDamage() instead")]
+	public void TakeDamage(float value)
+	{
+		Character?.TakeDamage(value);
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.Heal() instead")]
+	public void Heal(float value)
+	{
+		Character?.Heal(value);
+	}
+
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.Died instead")]
+	public PTSignal? Died
+	{
+		get => Character?.Died;
+		private set;
+	}
+
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.Landed instead")]
+	public PTSignal? Landed
+	{
+		get => Character?.Landed;
+		private set;
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Anchored instead"), CloneIgnore]
+	public bool? Anchored
+	{
+		get => Character?.Anchored ?? false;
+		set
+		{
+			Character?.Anchored = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.CanCollide instead"), CloneIgnore]
+	public bool? CanCollide
+	{
+		get => Character?.CanCollide ?? false;
+		set
+		{
+			Character?.CanCollide = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Velocity instead"), CloneIgnore]
+	public Vector3? Velocity
+	{
+		get => Character?.Velocity ?? Vector3.Zero;
+		set
+		{
+			Character?.Velocity = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.AngularVelocity instead"), CloneIgnore]
+	public Vector3? AngularVelocity
+	{
+		get => Character?.AngularVelocity ?? Vector3.Zero;
+		set
+		{
+			Character?.AngularVelocity = value
+		}
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.MovePosition() instead")]
+	public void MovePosition(Vector3 value)
+	{
+		Character?.MovePosition(value);
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.MoveRotation() instead")]
+	public void MoveRotation(Vector3 value)
+	{
+		Character?.MoveRotation(value);
+	}
+
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.Touched instead")]
+	public PTSignal<Physical>? Touched
+	{
+		get => Character?.Touched;
+		private set;
+	}
+
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.TouchEnded instead")]
+	public PTSignal<Physical>? TouchEnded
+	{
+		get => Character?.TouchEnded;
+		private set;
+	}
+
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.Clicked instead")]
+	public PTSignal<Player>? Clicked
+	{
+		get => Character?.Clicked;
+		private set;
+	}
+
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.MouseEnter instead")]
+	public PTSignal? MouseEnter
+	{
+		get => Character?.MouseEnter;
+		private set;
+	}
+
+
+	[ScriptProperty, Attributes.Obsolete("Use Character.MouseExit instead")]
+	public PTSignal? MouseExit
+	{
+		get => Character?.MouseExit;
+		private set;
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Position instead"), CloneIgnore]
+	public Vector3? Position
+	{
+		get => Character?.Position ?? Vector3.Zero;
+		set
+		{
+			Character?.Position = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Rotation instead"), CloneIgnore]
+	public Vector3? Rotation
+	{
+		get => Character?.Rotation ?? Vector3.Zero;
+		set
+		{
+			Character?.Rotation = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Size instead"), CloneIgnore]
+	public Vector3? Size
+	{
+		get => Character?.Size ?? Vector3.Zero;
+		set
+		{
+			Character?.Size = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.LocalPosition instead"), CloneIgnore]
+	public Vector3? LocalPosition
+	{
+		get => Character?.LocalPosition ?? Vector3.Zero;
+		set
+		{
+			Character?.LocalPosition = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.LocalRotation instead"), CloneIgnore]
+	public Vector3? LocalRotation
+	{
+		get => Character?.LocalRotation ?? Vector3.Zero;
+		set
+		{
+			Character?.LocalRotation = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.LocalSize instead"), CloneIgnore]
+	public Vector3? LocalSize
+	{
+		get => Character?.LocalSize ?? Vector3.Zero;
+		set
+		{
+			Character?.LocalSize = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Quaternion instead"), CloneIgnore]
+	public Quaternion? Quaternion
+	{
+		get => Character?.Quaternion ?? Quaternion.Identity;
+		set
+		{
+			Character?.Quaternion = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.LocalQuaternion instead"), CloneIgnore]
+	public Quaternion? LocalQuaternion
+	{
+		get => Character?.LocalQuaternion ?? Quaternion.Identity;
+		set
+		{
+			Character?.LocalQuaternion = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.LocalQuaternion instead"), CloneIgnore]
+	public Quaternion? LocalQuaternion
+	{
+		get => Character?.LocalQuaternion ?? Quaternion.Identity;
+		set
+		{
+			Character?.LocalQuaternion = value
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Locked instead"), CloneIgnore]
+	public bool? Locked
+	{
+		get => Character?.Locked ?? false;
+		set
+		{
+			Character?.Locked = value
+		}
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.Translate() instead")]
+	public void Translate(Vector3 value)
+	{
+		Character?.Translate(value);
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.Rotate() instead")]
+	public void Rotate(Vector3 value)
+	{
+		Character?.Rotate(value);
 	}
 
 	[Editable, ScriptProperty]
