@@ -161,92 +161,92 @@ public partial class NPC : Instance
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.SeatOffset instead"), CloneIgnore]
-	public int SeatOffset
+	public Vector3 SeatOffset
 	{
-		get => Character?.SeatOffset ?? Vector3.Zero
+		get => Character?.SeatOffset ?? Vector3.Zero;
 		set
 		{
-			Character?.SeatOffset = value
+			Character?.SeatOffset = value;
 		}
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Health instead"), CloneIgnore]
 	public float Health
 	{
-		get => Character?.Health ?? 0
+		get => Character?.Health ?? 0;
 		set
 		{
-			Character?.Health = value
+			Character?.Health = value;
 		}
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.MaxHealth instead"), CloneIgnore]
 	public float MaxHealth
 	{
-		get => Character?.MaxHealth ?? 0
+		get => Character?.MaxHealth ?? 0;
 		set
 		{
-			Character?.MaxHealth = value
+			Character?.MaxHealth = value;
 		}
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.JumpPower instead"), CloneIgnore]
 	public float JumpPower
 	{
-		get => Character?.JumpPower ?? 0
+		get => Character?.JumpPower ?? 0;
 		set
 		{
-			Character?.JumpPower = value
+			Character?.JumpPower = value;
 		}
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.WalkSpeed instead"), CloneIgnore]
 	public float WalkSpeed
 	{
-		get => Character?.WalkSpeed ?? 0
+		get => Character?.WalkSpeed ?? 0;
 		set
 		{
-			Character?.WalkSpeed = value
+			Character?.WalkSpeed = value;
 		}
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.JumpSound instead"), CloneIgnore]
 	public Sound? JumpSound
 	{
-		get => Character?.JumpSound
+		get => Character?.JumpSound;
 		set
 		{
-			Character?.JumpSound = value
+			Character?.JumpSound = value;
 		}
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.IsDead instead"), CloneIgnore]
 	public bool IsDead
 	{
-		get => Character?.IsDead ?? true
+		get => Character?.IsDead ?? true;
 		set
 		{
-			Character?.IsDead = value
+			Character?.IsDead = value;
 		}
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.SittingIn instead"), CloneIgnore]
 	public Seat? SittingIn
 	{
-		get => Character?.SittingIn
+		get => Character?.SittingIn;
 		set
 		{
-			Character?.SittingIn = value
+			Character?.SittingIn = value;
 		}
 	}
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.HoldingTool instead"), CloneIgnore]
 	public Tool? HoldingTool
 	{
-		get => Character?.HoldingTool
+		get => Character?.HoldingTool;
 		set
 		{
-			Character?.HoldingTool = value
+			Character?.HoldingTool = value;
 		}
 	}
 
@@ -257,7 +257,7 @@ public partial class NPC : Instance
 	}
 
 	[ScriptMethod, Attributes.Obsolete("Use Character.Unsit() instead")]
-	public void Unsit(bool? value)
+	public void Unsit(bool value = true)
 	{
 		Character?.Unsit(value);
 	}
@@ -319,31 +319,31 @@ public partial class NPC : Instance
 	}
 
 	[ScriptMethod, Attributes.Obsolete("Use Character.AddForce() instead")]
-	public void AddForce(Vector3 force, ForceModeEnum mode = ForceModeEnum.Force)
+	public void AddForce(Vector3 force, Physical.ForceModeEnum mode = Physical.ForceModeEnum.Force)
 	{
 		Character?.AddForce(force, mode);
 	}
 
 	[ScriptMethod, Attributes.Obsolete("Use Character.AddTorque() instead")]
-	public void AddTorque(Vector3 force, ForceModeEnum mode = ForceModeEnum.Force)
+	public void AddTorque(Vector3 force, Physical.ForceModeEnum mode = Physical.ForceModeEnum.Force)
 	{
 		Character?.AddTorque(force, mode);
 	}
 
 	[ScriptMethod, Attributes.Obsolete("Use Character.AddForceAtPosition() instead")]
-	public void AddForceAtPosition(Vector3 force, Vector3 position, ForceModeEnum mode = ForceModeEnum.Force)
+	public void AddForceAtPosition(Vector3 force, Vector3 position, Physical.ForceModeEnum mode = Physical.ForceModeEnum.Force)
 	{
 		Character?.AddForceAtPosition(force, position, mode);
 	}
 
 	[ScriptMethod, Attributes.Obsolete("Use Character.AddRelativeForce() instead")]
-	public void AddRelativeForce(Vector3 force, ForceModeEnum mode = ForceModeEnum.Force)
+	public void AddRelativeForce(Vector3 force, Physical.ForceModeEnum mode = Physical.ForceModeEnum.Force)
 	{
 		Character?.AddRelativeForce(force, mode);
 	}
 
 	[ScriptMethod, Attributes.Obsolete("Use Character.AddRelativeTorque() instead")]
-	public void AddRelativeTorque(Vector3 torque, ForceModeEnum mode = ForceModeEnum.Force)
+	public void AddRelativeTorque(Vector3 torque, Physical.ForceModeEnum mode = Physical.ForceModeEnum.Force)
 	{
 		Character?.AddRelativeTorque(torque, mode);
 	}
@@ -382,7 +382,7 @@ public partial class NPC : Instance
 		get => Character?.UseNametag ?? false;
 		set
 		{
-			Character?.UseNametag = value
+			Character?.UseNametag = value ?? false;
 		}
 	}
 
@@ -393,7 +393,7 @@ public partial class NPC : Instance
 		get => Character?.NametagOffset ?? Vector3.Zero;
 		set
 		{
-			Character?.NametagOffset = value
+			Character?.NametagOffset = value ?? Vector3.Zero;
 		}
 	}
 
@@ -404,7 +404,7 @@ public partial class NPC : Instance
 		get => Character?.NametagVisibleRadius ?? 0;
 		set
 		{
-			Character?.NametagVisibleRadius = value
+			Character?.NametagVisibleRadius = value ?? 0;
 		}
 	}
 
@@ -415,42 +415,17 @@ public partial class NPC : Instance
 		get => Character?.IsSitting ?? false;
 		set
 		{
-			Character?.IsSitting = value
-		}
-	}
-
-
-	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Position instead"), CloneIgnore]
-	public Vector3? Position
-	{
-		get => Character?.Position ?? Vector3.Zero;
-		set
-		{
-			Character?.Position = value
+			Character?.IsSitting = value ?? false;
 		}
 	}
 
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.IsOnGround instead"), CloneIgnore]
-	public bool? IsOnGround
-	{
-		get => Character?.IsOnGround ?? false;
-		set
-		{
-			Character?.IsOnGround = value
-		}
-	}
+	public bool IsOnGround => Character?.IsOnGround ?? false;
 
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.IsOnCeiling instead"), CloneIgnore]
-	public bool? IsOnCeiling
-	{
-		get => Character?.IsOnCeiling ?? false;
-		set
-		{
-			Character?.IsOnCeiling = value
-		}
-	}
+	public bool IsOnCeiling => Character?.IsOnCeiling ?? false;
 
 
 	[ScriptMethod, Attributes.Obsolete("Use Character.Kill() instead")]
@@ -538,7 +513,7 @@ public partial class NPC : Instance
 		get => Character?.Anchored ?? false;
 		set
 		{
-			Character?.Anchored = value
+			Character?.Anchored = value ?? false;
 		}
 	}
 
@@ -549,7 +524,7 @@ public partial class NPC : Instance
 		get => Character?.CanCollide ?? false;
 		set
 		{
-			Character?.CanCollide = value
+			Character?.CanCollide = value ?? false;
 		}
 	}
 
@@ -560,7 +535,7 @@ public partial class NPC : Instance
 		get => Character?.Velocity ?? Vector3.Zero;
 		set
 		{
-			Character?.Velocity = value
+			Character?.Velocity = value ?? Vector3.Zero;
 		}
 	}
 
@@ -571,7 +546,7 @@ public partial class NPC : Instance
 		get => Character?.AngularVelocity ?? Vector3.Zero;
 		set
 		{
-			Character?.AngularVelocity = value
+			Character?.AngularVelocity = value ?? Vector3.Zero;
 		}
 	}
 
@@ -636,7 +611,7 @@ public partial class NPC : Instance
 		get => Character?.Position ?? Vector3.Zero;
 		set
 		{
-			Character?.Position = value
+			Character?.Position = value ?? Vector3.Zero;
 		}
 	}
 
@@ -647,7 +622,7 @@ public partial class NPC : Instance
 		get => Character?.Rotation ?? Vector3.Zero;
 		set
 		{
-			Character?.Rotation = value
+			Character?.Rotation = value ?? Vector3.Zero;
 		}
 	}
 
@@ -658,7 +633,7 @@ public partial class NPC : Instance
 		get => Character?.Size ?? Vector3.Zero;
 		set
 		{
-			Character?.Size = value
+			Character?.Size = value ?? Vector3.Zero;
 		}
 	}
 
@@ -669,7 +644,7 @@ public partial class NPC : Instance
 		get => Character?.LocalPosition ?? Vector3.Zero;
 		set
 		{
-			Character?.LocalPosition = value
+			Character?.LocalPosition = value ?? Vector3.Zero;
 		}
 	}
 
@@ -680,7 +655,7 @@ public partial class NPC : Instance
 		get => Character?.LocalRotation ?? Vector3.Zero;
 		set
 		{
-			Character?.LocalRotation = value
+			Character?.LocalRotation = value ?? Vector3.Zero;
 		}
 	}
 
@@ -691,7 +666,7 @@ public partial class NPC : Instance
 		get => Character?.LocalSize ?? Vector3.Zero;
 		set
 		{
-			Character?.LocalSize = value
+			Character?.LocalSize = value ?? Vector3.Zero;
 		}
 	}
 
@@ -699,10 +674,10 @@ public partial class NPC : Instance
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Quaternion instead"), CloneIgnore]
 	public Quaternion? Quaternion
 	{
-		get => Character?.Quaternion ?? Quaternion.Identity;
+		get => Character?.Quaternion ?? Godot.Quaternion.Identity;
 		set
 		{
-			Character?.Quaternion = value
+			Character?.Quaternion = value ?? Godot.Quaternion.Identity;
 		}
 	}
 
@@ -710,21 +685,10 @@ public partial class NPC : Instance
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.LocalQuaternion instead"), CloneIgnore]
 	public Quaternion? LocalQuaternion
 	{
-		get => Character?.LocalQuaternion ?? Quaternion.Identity;
+		get => Character?.LocalQuaternion ?? Godot.Quaternion.Identity;
 		set
 		{
-			Character?.LocalQuaternion = value
-		}
-	}
-
-
-	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.LocalQuaternion instead"), CloneIgnore]
-	public Quaternion? LocalQuaternion
-	{
-		get => Character?.LocalQuaternion ?? Quaternion.Identity;
-		set
-		{
-			Character?.LocalQuaternion = value
+			Character?.LocalQuaternion = value ?? Godot.Quaternion.Identity;
 		}
 	}
 
@@ -735,10 +699,15 @@ public partial class NPC : Instance
 		get => Character?.Locked ?? false;
 		set
 		{
-			Character?.Locked = value
+			Character?.Locked = value ?? false;
 		}
 	}
 
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.IsClimbing instead"), CloneIgnore]
+	public bool IsClimbing => Character?.IsClimbing ?? false;
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.ClimbingTruss instead"), CloneIgnore]
+	public Truss? ClimbingTruss => Character?.ClimbingTruss;
 
 	[ScriptMethod, Attributes.Obsolete("Use Character.Translate() instead")]
 	public void Translate(Vector3 value)
@@ -751,6 +720,129 @@ public partial class NPC : Instance
 	public void Rotate(Vector3 value)
 	{
 		Character?.Rotate(value);
+	}
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.CanMove instead"), CloneIgnore]
+	public bool? CanMove
+	{
+		get => Character?.CanMove ?? false;
+		set
+		{
+			Character?.CanMove = value ?? false;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.SprintSpeed instead"), CloneIgnore]
+	public float? SprintSpeed
+	{
+		get => Character?.SprintSpeed ?? 0;
+		set
+		{
+			Character?.SprintSpeed = value ?? 0;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Stamina instead"), CloneIgnore]
+	public float? Stamina
+	{
+		get => Character?.Stamina ?? 0;
+		set
+		{
+			Character?.Stamina = value ?? 0;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.MaxStamina instead"), CloneIgnore]
+	public float? MaxStamina
+	{
+		get => Character?.MaxStamina ?? 0;
+		set
+		{
+			Character?.MaxStamina = value ?? 0;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.UseStamina instead"), CloneIgnore]
+	public bool? UseStamina
+	{
+		get => Character?.UseStamina ?? false;
+		set
+		{
+			Character?.UseStamina = value ?? false;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.StaminaRegen instead"), CloneIgnore]
+	public float? StaminaRegen
+	{
+		get => Character?.StaminaRegen ?? 0;
+		set
+		{
+			Character?.StaminaRegen = value ?? 0;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.StaminaBurn instead"), CloneIgnore]
+	public float? StaminaBurn
+	{
+		get => Character?.StaminaBurn ?? 0;
+		set
+		{
+			Character?.StaminaBurn = value ?? 0;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.KeepInventory instead"), CloneIgnore]
+	public bool? KeepInventory
+	{
+		get => Character?.KeepInventory ?? false;
+		set
+		{
+			Character?.KeepInventory = value ?? false;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.UseHeadTurning instead"), CloneIgnore]
+	public bool? UseHeadTurning
+	{
+		get => Character?.UseHeadTurning ?? false;
+		set
+		{
+			Character?.UseHeadTurning = value ?? false;
+		}
+	}
+
+
+	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.AllowAnimationWhileMoving instead"), CloneIgnore]
+	public bool? AllowAnimationWhileMoving
+	{
+		get => Character?.AllowAnimationWhileMoving ?? false;
+		set
+		{
+			Character?.AllowAnimationWhileMoving = value ?? false;
+		}
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.UnequipTool() instead")]
+	public void UnequipTool()
+	{
+		Character?.UnequipTool();
+	}
+
+
+	[ScriptMethod, Attributes.Obsolete("Use Character.ResetAppearance() instead")]
+	public void ResetAppearance()
+	{
+		Character?.ResetAppearance();
 	}
 
 	[Editable, ScriptProperty]
