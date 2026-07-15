@@ -33,7 +33,8 @@ public partial class Nametag : Node3D
 
 	public void UpdateNameTag()
 	{
-		if (Target is null) {
+		if (Target is null)
+		{
 			Visible = false;
 			return;
 		}
