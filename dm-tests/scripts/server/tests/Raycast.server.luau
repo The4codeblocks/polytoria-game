@@ -6,7 +6,7 @@ function Entry()
 	local char: CharacterModel = suite["NPC"].Character
 
 	local hit = Environment:Raycast(p1.Position, p1.Forward, 10, {})
-	assert(hit.Instance == npc.Character)
+	assert(hit.Instance == char)
 
 	local hit2 = Environment:Raycast(p1.Position, p1.Forward, 10, { char })
 	assert(hit2.Instance == p2)
