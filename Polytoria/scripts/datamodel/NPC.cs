@@ -399,12 +399,12 @@ public partial class NPC : Instance
 
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.NametagVisibleRadius instead"), CloneIgnore]
-	public float? NametagVisibleRadius
+	public float NametagVisibleRadius
 	{
 		get => Character?.NametagVisibleRadius ?? 0;
 		set
 		{
-			Character?.NametagVisibleRadius = value ?? 0;
+			Character?.NametagVisibleRadius = value;
 		}
 	}
 
@@ -734,34 +734,34 @@ public partial class NPC : Instance
 
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.SprintSpeed instead"), CloneIgnore]
-	public float? SprintSpeed
+	public float SprintSpeed
 	{
 		get => Character?.SprintSpeed ?? 0;
 		set
 		{
-			Character?.SprintSpeed = value ?? 0;
+			Character?.SprintSpeed = value;
 		}
 	}
 
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.Stamina instead"), CloneIgnore]
-	public float? Stamina
+	public float Stamina
 	{
 		get => Character?.Stamina ?? 0;
 		set
 		{
-			Character?.Stamina = value ?? 0;
+			Character?.Stamina = value;
 		}
 	}
 
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.MaxStamina instead"), CloneIgnore]
-	public float? MaxStamina
+	public float MaxStamina
 	{
 		get => Character?.MaxStamina ?? 0;
 		set
 		{
-			Character?.MaxStamina = value ?? 0;
+			Character?.MaxStamina = value;
 		}
 	}
 
@@ -778,23 +778,23 @@ public partial class NPC : Instance
 
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.StaminaRegen instead"), CloneIgnore]
-	public float? StaminaRegen
+	public float StaminaRegen
 	{
 		get => Character?.StaminaRegen ?? 0;
 		set
 		{
-			Character?.StaminaRegen = value ?? 0;
+			Character?.StaminaRegen = value;
 		}
 	}
 
 
 	[Editable, ScriptProperty, NoSync, Attributes.Obsolete("Use Character.StaminaBurn instead"), CloneIgnore]
-	public float? StaminaBurn
+	public float StaminaBurn
 	{
 		get => Character?.StaminaBurn ?? 0;
 		set
 		{
-			Character?.StaminaBurn = value ?? 0;
+			Character?.StaminaBurn = value;
 		}
 	}
 
