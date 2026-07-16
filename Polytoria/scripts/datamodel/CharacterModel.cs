@@ -597,12 +597,6 @@ public partial class CharacterModel : Physical
 		// Only enable physics in client mode
 		if (Root.SessionType != World.SessionTypeEnum.Client) return;
 
-		// Kill character if fall off the map
-		if (Position.Y < Root.Environment.PartDestroyHeight)
-		{
-			Kill();
-		}
-
 		if (IsSitting)
 		{
 			// Add stamina while sitting
@@ -1209,9 +1203,9 @@ public partial class CharacterModel : Physical
 
 	public void OnDestroying()
 	{
-		if (Controller is Player plr)
+		if (Controller is not null)
 		{
-			plr.Character = null;
+			Controller.Character = null;
 		}
 	}
 

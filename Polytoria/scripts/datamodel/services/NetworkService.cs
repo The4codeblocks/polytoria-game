@@ -888,9 +888,9 @@ public sealed partial class NetworkService : Instance
 			if (IsServer)
 			{
 				plr.IsReady = true;
-				plr.Respawn();
 				Root.Players.InvokePlayerAdded(plr);
 				RpcId(peerID, nameof(NetRecvReportReady));
+				if (Root.PlayerDefaults.AutomaticSpawn) plr.Respawn();
 			}
 		}
 	}

@@ -339,13 +339,19 @@ public sealed partial class Camera : Dynamic
 	{
 		get
 		{
-			if (_target != null && _target.IsDeleted)
-			{
-				_target = null!;
-			}
-			return _target;
+			return Parent is Dynamic dyn ? dyn : null;
 		}
-		set => _target = value;
+		set
+		{
+			if (value == null)
+			{
+				Parent = Root.Environment;
+			}
+			else
+			{
+				Parent = value;
+			}
+		}
 	}
 
 	[ScriptEnum]
@@ -374,10 +380,28 @@ public sealed partial class Camera : Dynamic
 	/// </summary>
 	internal bool UpdateCameraSelf = true;
 
+	private Instance? prevParent = null;
+
+	private void OnParentDeleting()
+	{
+		// bail out of a deleting instance
+		if (this == Root.Environment.CurrentCamera) Parent = Root.Environment;
+	}
+
 	public override void EnterTree()
 	{
 		// keep the current camera current
 		EnforceCurrentCam();
+
+		// prepare to bail
+		if (Parent != Root.Environment) {
+			Parent.Deleted += OnParentDeleting;
+			prevParent = Parent;
+		}
+		else
+		{
+			prevParent = null;
+		}
 
 		base.EnterTree();
 	}
@@ -386,6 +410,9 @@ public sealed partial class Camera : Dynamic
 	{
 		// keep the current camera current
 		EnforceCurrentCam();
+
+		// unprepare to bail
+		if (prevParent is not null) prevParent.Deleted -= OnParentDeleting;
 
 		base.ExitTree();
 	}
@@ -448,7 +475,7 @@ public sealed partial class Camera : Dynamic
 	internal void CameraProcess(double delta)
 	{
 		if (Root.Environment.CurrentCamera != this) return;
-		if (Mode == CameraModeEnum.Follow && Target != null)
+		if (Mode == CameraModeEnum.Follow)
 		{
 			if (Root.Input.IsGameFocused)
 			{
@@ -469,10 +496,10 @@ public sealed partial class Camera : Dynamic
 				LimitRotation();
 			}
 
-			Vector3 computedPosition = Target.Position + PositionOffset;
+			Vector3 targetLocalPos = PositionOffset;
 			Vector3 computedRotation = _targetRotation + RotationOffset;
 
-			_turnX.GlobalPosition = computedPosition;
+			_turnX.GlobalPosition = Position;
 			_turnX.RotationDegrees = computedRotation;
 
 			LimitZoomDistance();
@@ -517,7 +544,7 @@ public sealed partial class Camera : Dynamic
 			if (!ClipThroughWalls)
 			{
 				Vector3 desiredCamPos = _turnY2.GlobalPosition;
-				Vector3 origin = computedPosition;
+				Vector3 origin = Position;
 
 				PhysicsDirectSpaceState3D spaceState = Camera3D.GetWorld3D().DirectSpaceState;
 				PhysicsRayQueryParameters3D query = PhysicsRayQueryParameters3D.Create(origin, desiredCamPos);
@@ -545,21 +572,20 @@ public sealed partial class Camera : Dynamic
 
 			_distance = finalizedZoom;
 
-			_turnY.Position = new Vector3(0, 0, _distance);
+			GDNode3D.GlobalBasis = _turnY.GlobalBasis;
 
-			Vector3 posSetto = _turnY.GlobalPosition;
+			targetLocalPos -= Forward * _distance;
+			Vector3 targetPos = targetLocalPos + Target?.Position ?? Vector3.Zero; // avoid transform rotation
 
 			// Apply position/rotation
 			if (FollowLerp)
 			{
-				GDNode3D.GlobalPosition = GDNode3D.GlobalPosition.Lerp(posSetto, MathUtils.ExpDecay((float)delta, LerpSpeed));
+				Position = Position.Lerp(targetPos, MathUtils.ExpDecay((float)delta, LerpSpeed));
 			}
 			else
 			{
-				GDNode3D.GlobalPosition = posSetto;
+				Position = targetPos;
 			}
-
-			GDNode3D.GlobalBasis = _turnY.GlobalBasis;
 		}
 		else if (Mode == CameraModeEnum.Free)
 		{

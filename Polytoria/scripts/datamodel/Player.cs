@@ -50,7 +50,7 @@ public sealed partial class Player : NPC
 	internal bool teleporting = false;
 
 	private RemoteTransform3D _remoteCamAttach = null!;
-	internal Dynamic CamAttach = null!;
+	private bool _useRemoteCamAttach = false;
 	private Physical? _mouseHoveringOn;
 
 	public Vector3 DefaultSpawnLocation = new(0, 5, 0);
@@ -321,11 +321,24 @@ public sealed partial class Player : NPC
 
 	private void SetCamRemoteAttachEnabled(bool enabled)
 	{
+		if (enabled == _useRemoteCamAttach) return;
+
 		_remoteCamAttach.UpdatePosition = enabled;
 		_remoteCamAttach.UpdateRotation = enabled;
-		if (enabled == false)
+		_useRemoteCamAttach = enabled;
+
+		Camera curcam = Root.Environment.CurrentCamera;
+		if (enabled)
 		{
-			CamAttach.LocalPosition = new Vector3(0, CameraHeight, 0);
+			if (curcam.Parent == Character && curcam.Mode == Camera.CameraModeEnum.Follow) curcam.Parent = Root.Environment;
+		}
+		else
+		{
+			if (Root.PlayerDefaults.AutoCameraFollow && curcam.Mode == Camera.CameraModeEnum.Follow)
+			{
+				curcam.Parent = Character;
+				curcam.PositionOffset = new Vector3(0, CameraHeight, 0);
+			}
 		}
 	}
 
@@ -441,7 +454,7 @@ public sealed partial class Player : NPC
 		Camera? cam = Root.Environment.CurrentCamera;
 
 		// Apply camera modifier if enabled
-		if (Character.UseHeadTurning && cam != null && cam.Mode == Camera.CameraModeEnum.Follow && cam.Target == CamAttach)
+		if (Character.UseHeadTurning && cam != null && cam.Mode == Camera.CameraModeEnum.Follow && cam.Parent == Character)
 		{
 			Character.ApplyCameraModifier(cam);
 		}
@@ -540,6 +553,7 @@ public sealed partial class Player : NPC
 	{
 		if (!Root.Network.IsServer) return; // Respawn on server only
 
+		if (!Root.PlayerDefaults.AutomaticSpawn) return;
 		// Respawn on client
 		await Globals.Singleton.WaitAsync(RespawnTime);
 		Respawn();
@@ -551,20 +565,21 @@ public sealed partial class Player : NPC
 		IsLocal = true;
 		SendPing();
 
-		CamAttach = Globals.LoadInstance<Dynamic>(Root);
-		CamAttach.Name = "CameraAttachment";
-		CamAttach.Parent = Character;
-		CamAttach.AutoUpdateNetTransform = false;
+		Camera curcam = Root.Environment.CurrentCamera;
+		if (Root.PlayerDefaults.AutoCameraFollow && curcam.Mode == Camera.CameraModeEnum.Follow)
+		{
+			curcam.Parent = Character;
+			curcam.PositionOffset = new Vector3(0, CameraHeight, 0);
+		}
 
 		_remoteCamAttach = new();
 		Character?.GetAttachment(CharacterModel.CharacterAttachmentEnum.Head).GDNode.AddChild(_remoteCamAttach, @internal: Node.InternalMode.Back);
-		_remoteCamAttach.RemotePath = _remoteCamAttach.GetPathTo(CamAttach.GDNode3D);
+		_remoteCamAttach.RemotePath = _remoteCamAttach.GetPathTo(curcam.GDNode3D);
 
 		SetCamRemoteAttachEnabled(false);
 
 		Camera? cam = Root.Environment.CurrentCamera;
 		if (cam == null) return;
-		cam.Target = CamAttach;
 		cam.UpdateCameraSelf = false;
 		cam.FirstPersonEntered.Connect(OnFirstPersonEntered);
 		cam.FirstPersonExited.Connect(OnFirstPersonExited);
@@ -652,7 +667,13 @@ public sealed partial class Player : NPC
 	[ScriptMethod]
 	public void Respawn()
 	{
+		CharacterModel? oldChar = Character;
 		InternalSpawn();
+		if (Root.PlayerDefaults.CorpseDecay && !Root.PlayerDefaults.ReuseCharacter)
+		{
+			// Remove would-be corpse
+			oldChar?.Destroy();
+		}
 	}
 
 	private void InternalSpawn()
@@ -681,6 +702,12 @@ public sealed partial class Player : NPC
 					}
 				}
 			}
+		}
+		else
+		{
+			CharacterModel oldChar = Character;
+			Character = null;
+			Character = oldChar;
 		}
 
 		// Apply playerdefaults
@@ -754,29 +781,6 @@ public sealed partial class Player : NPC
 		Character?.OverrideCanCollide = false;
 		Character?.UpdateCollision();
 		Character?.IsDead = false;
-
-		UpdateCamAttach();
-	}
-
-	internal void UpdateCamAttach()
-	{
-		if (CamAttach == null || CamAttach.DeletedAsChild)
-		{
-			CamAttach = Globals.LoadInstance<Dynamic>(Root);
-			CamAttach.Name = "CameraAttachment";
-			CamAttach.AutoUpdateNetTransform = false;
-		}
-		CamAttach.Parent = Character;
-		CamAttach.LocalPosition = new Vector3(0, CameraHeight, 0);
-
-		if (_remoteCamAttach == null)
-		{
-			_remoteCamAttach = new();
-		}
-		Character?.GetAttachment(CharacterModel.CharacterAttachmentEnum.Head).GDNode.AddChild(_remoteCamAttach, @internal: Node.InternalMode.Back);
-		_remoteCamAttach.RemotePath = _remoteCamAttach.GetPathTo(CamAttach.GDNode3D);
-
-		SetCamRemoteAttachEnabled(false);
 	}
 
 	internal void OnCharacterChanged(CharacterModel? oldChar = null)
@@ -791,11 +795,31 @@ public sealed partial class Player : NPC
 			ptc.RagdollStarted.Connect(OnRagdollStarted);
 			ptc.RagdollStopped.Connect(OnRagdollStopped);
 		}
-		UpdateCamAttach();
 		oldChar?.AutoUpdateNetTransform = true;
 		// Disable auto update, this will be updated manually
 		Character?.AutoUpdateNetTransform = false;
 		UpdatePlayerCollision();
+
+		Camera curcam = Root.Environment.CurrentCamera;
+		if (
+			curcam.Mode == Camera.CameraModeEnum.Follow &&
+			(Root.PlayerDefaults.AutoCameraFollow || curcam.Parent == oldChar)
+		)
+		{
+			if (Character is null)
+			{
+				curcam.Parent = Root.Environment;
+			}
+			else
+			{
+				curcam.Parent = Character;
+				curcam.PositionOffset = new Vector3(0, CameraHeight, 0);
+			}
+		}
+		if (Character is null)
+		{
+			OnPlayerDied();
+		}
 	}
 
 	internal void AdminKick()
