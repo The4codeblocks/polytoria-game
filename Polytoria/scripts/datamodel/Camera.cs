@@ -542,11 +542,12 @@ public sealed partial class Camera : Dynamic
 			float finalizedZoom = _currentZoom;
 
 			_turnY2.Position = new Vector3(0, 0, _currentZoom);
+			latentTrackedPos = Target?.Position ?? latentTrackedPos;
 
 			if (!ClipThroughWalls)
 			{
 				Vector3 desiredCamPos = _turnY2.GlobalPosition;
-				Vector3 origin = Position;
+				Vector3 origin = latentTrackedPos + targetLocalPos;
 
 				PhysicsDirectSpaceState3D spaceState = Camera3D.GetWorld3D().DirectSpaceState;
 				PhysicsRayQueryParameters3D query = PhysicsRayQueryParameters3D.Create(origin, desiredCamPos);
@@ -559,6 +560,7 @@ public sealed partial class Camera : Dynamic
 
 				if (result.Count > 0)
 				{
+					GD.Print(((Node)result["collider"]).Name);
 					Vector3 hitPoint = (Vector3)result["position"];
 
 					float hitDist = origin.DistanceTo(hitPoint) - ClipSafeMargin;
@@ -577,7 +579,7 @@ public sealed partial class Camera : Dynamic
 			GDNode3D.GlobalBasis = _turnY.GlobalBasis;
 
 			targetLocalPos -= Forward * _distance;
-			latentTrackedPos = Target?.Position ?? latentTrackedPos;
+
 			Vector3 targetPos = targetLocalPos + latentTrackedPos; // avoid transform rotation
 
 			// Apply position/rotation
