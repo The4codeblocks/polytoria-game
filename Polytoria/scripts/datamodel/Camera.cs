@@ -472,6 +472,8 @@ public sealed partial class Camera : Dynamic
 		base.Process(delta);
 	}
 
+	private Vector3 latentTrackedPos = Vector3.Zero;
+
 	internal void CameraProcess(double delta)
 	{
 		if (Root.Environment.CurrentCamera != this) return;
@@ -575,7 +577,8 @@ public sealed partial class Camera : Dynamic
 			GDNode3D.GlobalBasis = _turnY.GlobalBasis;
 
 			targetLocalPos -= Forward * _distance;
-			Vector3 targetPos = targetLocalPos + Target?.Position ?? Vector3.Zero; // avoid transform rotation
+			latentTrackedPos = Target?.Position ?? latentTrackedPos;
+			Vector3 targetPos = targetLocalPos + latentTrackedPos; // avoid transform rotation
 
 			// Apply position/rotation
 			if (FollowLerp)

@@ -1211,7 +1211,7 @@ public partial class CharacterModel : Physical
 
 	public void OnDestroying()
 	{
-		((Player)Controller)?.OnPlayerDied();
+		if (Controller is Player plr) plr?.OnPlayerDied();
 		Controller?.Character = null;
 	}
 
