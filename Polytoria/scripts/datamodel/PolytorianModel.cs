@@ -77,6 +77,8 @@ public sealed partial class PolytorianModel : CharacterModel
 
 	public PhysicalBone3D? VelocityPhysicalBone;
 
+	public override Dynamic Head => GetAttachment(CharacterAttachmentEnum.Head);
+
 	[Editable, ScriptProperty, Export, SyncVar]
 	public Color HeadColor
 	{

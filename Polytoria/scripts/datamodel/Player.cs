@@ -25,7 +25,6 @@ namespace Polytoria.Datamodel;
 public sealed partial class Player : NPC
 {
 	private const double MaxAFKTime = 60 * 15;
-	private const float CameraHeight = 2f;
 	public const string CreatorHeadScene = "res://scenes/creator/livecollab/head.tscn";
 	public const string BadgeImageDirPath = "res://assets/textures/client/ui/playerlist/badges/";
 	private static readonly Dictionary<string, string> _badgePathCache = [];
@@ -337,14 +336,7 @@ public sealed partial class Player : NPC
 
 	private void UpdatePlayerCollision()
 	{
-		if (Root.Players.PlayerCollisionEnabled)
-		{
-			Character?.SetCollisionMask(2, true);
-		}
-		else
-		{
-			Character?.SetCollisionMask(2, false);
-		}
+		Character?.SetCollisionMask(2, Root.Players.PlayerCollisionEnabled);
 	}
 
 	public override void Process(double delta)
@@ -545,7 +537,6 @@ public sealed partial class Player : NPC
 		if (Root.PlayerDefaults.AutoCameraFollow && curcam.Mode == Camera.CameraModeEnum.Follow)
 		{
 			curcam.Parent = Character;
-			curcam.PositionOffset = new Vector3(0, CameraHeight, 0);
 		}
 
 		Camera? cam = Root.Environment.CurrentCamera;
@@ -750,15 +741,7 @@ public sealed partial class Player : NPC
 			(Root.PlayerDefaults.AutoCameraFollow || curcam.Parent == oldChar)
 		)
 		{
-			if (Character is null)
-			{
-				curcam.Parent = Root.Environment;
-			}
-			else
-			{
-				curcam.Parent = Character;
-				curcam.PositionOffset = new Vector3(0, CameraHeight, 0);
-			}
+			curcam.Parent = Character is null ? Root.Environment : Character.Head;
 		}
 	}
 

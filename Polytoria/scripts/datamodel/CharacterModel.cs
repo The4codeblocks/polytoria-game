@@ -75,6 +75,8 @@ public partial class CharacterModel : Physical
 	protected override float PositionSyncThreshold => 0.1f;
 	protected override float RotationSyncThreshold => 1f;
 
+	public virtual Dynamic Head => this;
+
 	// List of all emotes
 	public static readonly string[] EmoteList =
 	[
