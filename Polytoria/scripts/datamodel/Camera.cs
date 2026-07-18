@@ -560,7 +560,6 @@ public sealed partial class Camera : Dynamic
 
 				if (result.Count > 0)
 				{
-					GD.Print(((Node)result["collider"]).Name);
 					Vector3 hitPoint = (Vector3)result["position"];
 
 					float hitDist = origin.DistanceTo(hitPoint) - ClipSafeMargin;
