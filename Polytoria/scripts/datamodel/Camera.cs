@@ -375,11 +375,6 @@ public sealed partial class Camera : Dynamic
 	[ScriptProperty]
 	public PTSignal FirstPersonExited { get; private set; } = new();
 
-	/// <summary>
-	/// Should camera be updating itself or not.
-	/// </summary>
-	internal bool UpdateCameraSelf = true;
-
 	private Instance? prevParent = null;
 
 	private void OnParentDeleting()
@@ -461,15 +456,6 @@ public sealed partial class Camera : Dynamic
 		_inputHelper.GodotInputEvent -= OnInputEarly;
 		_inputHelper.QueueFree();
 		base.PreDelete();
-	}
-
-	public override void Process(double delta)
-	{
-		if (UpdateCameraSelf)
-		{
-			CameraProcess(delta);
-		}
-		base.Process(delta);
 	}
 
 	private Vector3 latentTrackedPos = Vector3.Zero;

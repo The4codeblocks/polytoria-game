@@ -541,7 +541,6 @@ public sealed partial class Player : NPC
 
 		Camera? cam = Root.Environment.CurrentCamera;
 		if (cam == null) return;
-		cam.UpdateCameraSelf = false;
 		cam.FirstPersonEntered.Connect(OnFirstPersonEntered);
 		cam.FirstPersonExited.Connect(OnFirstPersonExited);
 		CharacterChanged.Connect(OnCharacterChanged);
