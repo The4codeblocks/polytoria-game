@@ -1040,14 +1040,6 @@ public partial class NPC : Instance
 		base.Ready();
 	}
 
-#if CREATOR
-	public override void CreatorInserted()
-	{
-		Root.Insert.InitializeDefaultNPC(this);
-		base.CreatorInserted();
-	}
-#endif
-
 	[ScriptMethod]
 	public void SetNavDestination(Vector3 pos)
 	{

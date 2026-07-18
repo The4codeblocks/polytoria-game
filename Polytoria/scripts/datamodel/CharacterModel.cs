@@ -1095,6 +1095,14 @@ public partial class CharacterModel : Physical
 		SetAnimSpeed(1);
 	}
 
+#if CREATOR
+	public override void CreatorInserted()
+	{
+		Root.Insert.InitializeDefaultCharacter(this);
+		base.CreatorInserted();
+	}
+#endif
+
 	[Editable, ScriptProperty]
 	public NPC? Controller
 	{

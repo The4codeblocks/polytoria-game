@@ -49,7 +49,6 @@ public sealed partial class Player : NPC
 
 	internal bool teleporting = false;
 
-	private RemoteTransform3D _remoteCamAttach = null!;
 	private bool _useRemoteCamAttach = false;
 	private Physical? _mouseHoveringOn;
 
@@ -319,29 +318,6 @@ public sealed partial class Player : NPC
 		Character?.GDNode3D?.Visible = _isReady;
 	}
 
-	private void SetCamRemoteAttachEnabled(bool enabled)
-	{
-		if (enabled == _useRemoteCamAttach) return;
-
-		_remoteCamAttach.UpdatePosition = enabled;
-		_remoteCamAttach.UpdateRotation = enabled;
-		_useRemoteCamAttach = enabled;
-
-		Camera curcam = Root.Environment.CurrentCamera;
-		if (enabled)
-		{
-			if (curcam.Parent == Character && curcam.Mode == Camera.CameraModeEnum.Follow) curcam.Parent = Root.Environment;
-		}
-		else
-		{
-			if (Root.PlayerDefaults.AutoCameraFollow && curcam.Mode == Camera.CameraModeEnum.Follow)
-			{
-				curcam.Parent = Character;
-				curcam.PositionOffset = new Vector3(0, CameraHeight, 0);
-			}
-		}
-	}
-
 	private void OnPlayersPropertyChanged(string propName)
 	{
 		if (propName == "PlayerCollisionEnabled")
@@ -572,12 +548,6 @@ public sealed partial class Player : NPC
 			curcam.PositionOffset = new Vector3(0, CameraHeight, 0);
 		}
 
-		_remoteCamAttach = new();
-		Character?.GetAttachment(CharacterModel.CharacterAttachmentEnum.Head).GDNode.AddChild(_remoteCamAttach, @internal: Node.InternalMode.Back);
-		_remoteCamAttach.RemotePath = _remoteCamAttach.GetPathTo(curcam.GDNode3D);
-
-		SetCamRemoteAttachEnabled(false);
-
 		Camera? cam = Root.Environment.CurrentCamera;
 		if (cam == null) return;
 		cam.UpdateCameraSelf = false;
@@ -587,12 +557,6 @@ public sealed partial class Player : NPC
 
 		// Disable auto update, this will be updated manually
 		Character?.AutoUpdateNetTransform = false;
-
-		if (Character is PolytorianModel ptc)
-		{
-			ptc.RagdollStarted.Connect(OnRagdollStarted);
-			ptc.RagdollStopped.Connect(OnRagdollStopped);
-		}
 	}
 
 	// Emit when this player is ready, fired for everyone
@@ -601,16 +565,6 @@ public sealed partial class Player : NPC
 		SetNetworkAuthority(PeerID);
 		UpdatePlayerCollision();
 		UpdatePlrReady();
-	}
-
-	private void OnRagdollStarted()
-	{
-		SetCamRemoteAttachEnabled(true);
-	}
-
-	private void OnRagdollStopped()
-	{
-		SetCamRemoteAttachEnabled(false);
 	}
 
 	internal void InvokeChatted(string msg)
@@ -785,16 +739,6 @@ public sealed partial class Player : NPC
 
 	internal void OnCharacterChanged(CharacterModel? oldChar = null)
 	{
-		if (oldChar is PolytorianModel optc)
-		{
-			optc.RagdollStarted.Disconnect(OnRagdollStarted);
-			optc.RagdollStopped.Disconnect(OnRagdollStopped);
-		}
-		if (Character is PolytorianModel ptc)
-		{
-			ptc.RagdollStarted.Connect(OnRagdollStarted);
-			ptc.RagdollStopped.Connect(OnRagdollStopped);
-		}
 		oldChar?.AutoUpdateNetTransform = true;
 		// Disable auto update, this will be updated manually
 		Character?.AutoUpdateNetTransform = false;

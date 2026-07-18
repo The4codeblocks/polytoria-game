@@ -88,25 +88,34 @@ public sealed partial class InsertService : Instance
 		ptm.LocalPosition = Vector3.Zero;
 		ptm.LocalRotation = Vector3.Zero;
 		ptm.LocalSize = Vector3.One;
-		ptm.SetNetworkAuthority(npc.NetworkAuthority, false);
+		ptm.SetNetworkAuthority(owner, false);
 		ptm.Animator?.SetNetworkAuthority(owner, false);
 		ptm.Parent = Root.Environment;
 		npc.Character = ptm;
+		ptm.JumpSound.SetNetworkAuthority(owner, false);
+	}
+
+	public void InitializeDefaultCharacter(CharacterModel charModel)
+	{
+		var animator = New<Animator>();
+		animator.AutoInit = false;
+		animator.Name = "Animator";
+		animator.Parent = charModel;
+		charModel.Animator = animator;
 
 		// Jump sound
 		BuiltInAudioAsset audio = New<BuiltInAudioAsset>();
 		audio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.Jump;
 		var jumpSound = New<Sound>();
 		jumpSound.Name = "JumpSound";
-		jumpSound.Parent = ptm;
+		jumpSound.Parent = charModel;
 		jumpSound.Volume = 0.5f;
 		jumpSound.Audio = audio;
 		jumpSound.Autoplay = false;
 		jumpSound.Loop = false;
 		jumpSound.PlayInWorld = true;
-		jumpSound.SetNetworkAuthority(owner, false);
 
-		ptm.JumpSound = jumpSound;
+		charModel.JumpSound = jumpSound;
 
 		jumpSound.LocalPosition = Vector3.Zero;
 		jumpSound.LocalRotation = Vector3.Zero;
@@ -117,11 +126,7 @@ public sealed partial class InsertService : Instance
 	public PolytorianModel DefaultCharacter()
 	{
 		var ptm = New<PolytorianModel>();
-		var animator = New<Animator>();
-		animator.AutoInit = false;
-		animator.Name = "Animator";
-		animator.Parent = ptm;
-		ptm.Animator = animator;
+		InitializeDefaultCharacter(ptm);
 
 		return ptm;
 	}
