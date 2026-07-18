@@ -1211,10 +1211,8 @@ public partial class CharacterModel : Physical
 
 	public void OnDestroying()
 	{
-		if (Controller is not null)
-		{
-			Controller.Character = null;
-		}
+		((Player)Controller)?.OnPlayerDied();
+		Controller?.Character = null;
 	}
 
 	public override void Process(double delta)

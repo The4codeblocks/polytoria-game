@@ -760,10 +760,6 @@ public sealed partial class Player : NPC
 				curcam.PositionOffset = new Vector3(0, CameraHeight, 0);
 			}
 		}
-		if (Character is null)
-		{
-			OnPlayerDied();
-		}
 	}
 
 	internal void AdminKick()
