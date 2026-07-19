@@ -51,28 +51,10 @@ public sealed partial class InsertService : Instance
 		// Default character
 		var ptm = DefaultCharacter();
 		ptm.Name = "Character";
+		ptm.Parent = Root.Environment;
 		ptm.LocalPosition = Vector3.Zero;
 		ptm.LocalRotation = Vector3.Zero;
 		ptm.LocalSize = Vector3.One;
-		ptm.Parent = Root.Environment;
-
-		// Jump sound
-		BuiltInAudioAsset audio = New<BuiltInAudioAsset>();
-		audio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.Jump;
-		var jumpSound = New<Sound>();
-		jumpSound.Name = "JumpSound";
-		jumpSound.Parent = ptm;
-		jumpSound.Volume = 0.5f;
-		jumpSound.Audio = audio;
-		jumpSound.Autoplay = false;
-		jumpSound.Loop = false;
-		jumpSound.PlayInWorld = true;
-
-		ptm.JumpSound = jumpSound;
-
-		jumpSound.LocalPosition = Vector3.Zero;
-		jumpSound.LocalRotation = Vector3.Zero;
-		jumpSound.LocalSize = Vector3.One;
 
 		return ptm;
 	}
