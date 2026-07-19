@@ -456,17 +456,23 @@ public partial class NPC : Instance
 	}
 
 
-	[ScriptMethod, Attributes.Obsolete("Use Character.LoadAppearance() instead")]
+	[ScriptMethod, Attributes.Obsolete("Use Character.LoadAppearance() instead, only if it's a PolytorianModel")]
 	public void LoadAppearance(int value)
 	{
-		Character?.LoadAppearance(value);
+		if (Character is PolytorianModel ptm)
+		{
+			ptm.LoadAppearance();
+		}
 	}
 
 
-	[ScriptMethod, Attributes.Obsolete("Use Character.ClearAppearance() instead")]
+	[ScriptMethod, Attributes.Obsolete("Use Character.ClearAppearance() instead, only if it's a PolytorianModel")]
 	public void ClearAppearance()
 	{
-		Character?.ClearAppearance();
+		if (Character is PolytorianModel ptm)
+		{
+			ptm.ClearAppearance();
+		}
 	}
 
 
