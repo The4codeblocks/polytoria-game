@@ -92,7 +92,7 @@ public sealed partial class InsertService : Instance
 		ptm.Animator?.SetNetworkAuthority(owner, false);
 		ptm.Parent = Root.Environment;
 		npc.Character = ptm;
-		ptm.JumpSound.SetNetworkAuthority(owner, false);
+		ptm.JumpSound!.SetNetworkAuthority(owner, false);
 	}
 
 	public void InitializeDefaultCharacter(CharacterModel charModel)

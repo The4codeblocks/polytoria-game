@@ -398,7 +398,7 @@ public sealed partial class PolytorianModel : CharacterModel
 	{
 		base.Process(delta);
 
-		if (Ragdolling)
+		if (Ragdolling && VelocityPhysicalBone is not null)
 		{
 			Position = VelocityPhysicalBone.GetGlobalPosition();
 		}

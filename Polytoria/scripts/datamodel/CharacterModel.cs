@@ -458,15 +458,6 @@ public partial class CharacterModel : Physical
 	}
 
 	[ScriptMethod]
-	public void ClearAppearance()
-	{
-		if (this is PolytorianModel ptm)
-		{
-			ptm.ClearAppearance();
-		}
-	}
-
-	[ScriptMethod]
 	public void ResetAppearance()
 	{
 		ClearAppearance();
