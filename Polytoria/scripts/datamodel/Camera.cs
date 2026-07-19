@@ -53,6 +53,7 @@ public sealed partial class Camera : Dynamic
 	private float _moveSpeed = 8f;
 	private readonly float _rotateSpeed = 0.005f;
 	private Dynamic? _target = null!;
+	private RemoteTransform3D tracker = new() { UpdatePosition = false, UpdateRotation = false };
 
 	private bool _isMouseCaptured;
 	private Vector2I _lastMousePosition;
@@ -81,6 +82,7 @@ public sealed partial class Camera : Dynamic
 		set
 		{
 			_mode = value;
+			UpdateTracker(value);
 			OnPropertyChanged();
 		}
 	}
@@ -337,20 +339,13 @@ public sealed partial class Camera : Dynamic
 	[ScriptProperty]
 	public Dynamic? Target
 	{
-		get
-		{
-			return Parent is Dynamic dyn ? dyn : null;
-		}
+		get => _target;
 		set
 		{
-			if (value == null)
-			{
-				Parent = Root.Environment;
-			}
-			else
-			{
-				Parent = value;
-			}
+			_target?.Deleted -= OnTrackerThreatened;
+			_target = value;
+			value?.Deleted += OnTrackerThreatened;
+			OnPropertyChanged();
 		}
 	}
 
@@ -375,29 +370,28 @@ public sealed partial class Camera : Dynamic
 	[ScriptProperty]
 	public PTSignal FirstPersonExited { get; private set; } = new();
 
-	private Instance? prevParent = null;
-
-	private void OnParentDeleting()
+	public void UpdateTracker(CameraModeEnum? cammode = null)
 	{
-		// bail out of a deleting instance
-		if (this == Root.Environment.CurrentCamera) Parent = Root.Environment;
+		tracker.UpdatePosition = false;// (cammode ?? Mode) == CameraModeEnum.Follow;
+	}
+
+	public void OnTrackerThreatened()
+	{
+		tracker.UpdatePosition = false;
+		tracker.Reparent(GDNode);
+	}
+
+	public void InformTracker()
+	{
+		tracker.RemotePath = tracker.GetPathTo(GDNode3D);
 	}
 
 	public override void EnterTree()
 	{
 		// keep the current camera current
 		EnforceCurrentCam();
-
-		// prepare to bail
-		if (Parent != Root.Environment) {
-			Parent.Deleted += OnParentDeleting;
-			prevParent = Parent;
-		}
-		else
-		{
-			prevParent = null;
-		}
-
+		InformTracker();
+		UpdateTracker();
 		base.EnterTree();
 	}
 
@@ -405,10 +399,7 @@ public sealed partial class Camera : Dynamic
 	{
 		// keep the current camera current
 		EnforceCurrentCam();
-
-		// unprepare to bail
-		if (prevParent is not null) prevParent.Deleted -= OnParentDeleting;
-
+		tracker.UpdatePosition = false;
 		base.ExitTree();
 	}
 
@@ -425,6 +416,8 @@ public sealed partial class Camera : Dynamic
 	public override void Init()
 	{
 		base.Init();
+
+		InformTracker();
 
 		GDNode.AddChild(_inputHelper = new(), @internal: Node.InternalMode.Back);
 		_inputHelper.GodotUnhandledInputEvent += OnInput;

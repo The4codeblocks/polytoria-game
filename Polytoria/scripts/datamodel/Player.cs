@@ -422,7 +422,7 @@ public sealed partial class Player : NPC
 		Camera? cam = Root.Environment.CurrentCamera;
 
 		// Apply camera modifier if enabled
-		if (Character.UseHeadTurning && cam != null && cam.Mode == Camera.CameraModeEnum.Follow && cam.Parent == Character)
+		if (Character.UseHeadTurning && cam != null && cam.Mode == Camera.CameraModeEnum.Follow && cam.Target == Character)
 		{
 			Character.ApplyCameraModifier(cam);
 		}
@@ -536,7 +536,7 @@ public sealed partial class Player : NPC
 		Camera curcam = Root.Environment.CurrentCamera;
 		if (Root.PlayerDefaults.AutoCameraFollow && curcam.Mode == Camera.CameraModeEnum.Follow)
 		{
-			curcam.Parent = Character;
+			curcam.Target = Character;
 		}
 
 		Camera? cam = Root.Environment.CurrentCamera;
@@ -737,10 +737,10 @@ public sealed partial class Player : NPC
 		Camera curcam = Root.Environment.CurrentCamera;
 		if (
 			curcam.Mode == Camera.CameraModeEnum.Follow &&
-			(Root.PlayerDefaults.AutoCameraFollow || curcam.Parent == oldChar)
+			(Root.PlayerDefaults.AutoCameraFollow || curcam.Target == oldChar)
 		)
 		{
-			curcam.Parent = Character is null ? Root.Environment : Character.Head;
+			curcam.Target = Character?.Head;
 		}
 	}
 
