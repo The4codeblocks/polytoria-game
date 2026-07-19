@@ -7,6 +7,7 @@ using Godot.Collections;
 using Polytoria.Attributes;
 using Polytoria.Client.Settings;
 using Polytoria.Scripting;
+using Polytoria.Shared;
 using Polytoria.Shared.Misc;
 using Polytoria.Utils;
 using System;
@@ -370,29 +371,31 @@ public sealed partial class Camera : Dynamic
 	[ScriptProperty]
 	public PTSignal FirstPersonExited { get; private set; } = new();
 
-	public void UpdateTracker(CameraModeEnum? cammode = null)
+	private void UpdateTracker(CameraModeEnum? cammode = null)
 	{
 		tracker.UpdatePosition = false;// (cammode ?? Mode) == CameraModeEnum.Follow;
 	}
 
-	public void OnTrackerThreatened()
+	private void OnTrackerThreatened()
 	{
 		tracker.UpdatePosition = false;
 		tracker.Reparent(GDNode);
 	}
 
-	public void InformTracker()
+	private async void InformTracker()
 	{
+		await Globals.Singleton.WaitFrame();
 		tracker.RemotePath = tracker.GetPathTo(GDNode3D);
+		UpdateTracker();
 	}
 
 	public override void EnterTree()
 	{
 		// keep the current camera current
 		EnforceCurrentCam();
-		InformTracker();
-		UpdateTracker();
 		base.EnterTree();
+		// this is needed because GetPath doesn't update when it entered tree
+		InformTracker();
 	}
 
 	public override void ExitTree()

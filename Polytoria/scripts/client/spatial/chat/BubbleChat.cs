@@ -19,7 +19,7 @@ public partial class BubbleChat : Node3D
 	[Export] private Control _itemContainer = null!;
 	private Player? TargetPlayer = null;
 
-	public void SetTarget(Player plr)
+	public void SetTarget(Player? plr)
 	{
 		if (TargetPlayer != null) TargetPlayer.Chatted.Disconnect(OnPlayerChatted);
 		TargetPlayer = plr;
@@ -42,7 +42,7 @@ public partial class BubbleChat : Node3D
 	{
 		if (TargetPlayer!.Character != null)
 		{
-			Aabb? bounds = TargetPlayer.Character.GetAttachment(CharacterModel.CharacterAttachmentEnum.Head).CalculateBounds();
+			Aabb? bounds = (TargetPlayer.Character.Head ?? TargetPlayer.Character).CalculateBounds();
 			if (bounds.HasValue)
 			{
 				int decrease = 0;

@@ -77,8 +77,6 @@ public sealed partial class PolytorianModel : CharacterModel
 
 	public PhysicalBone3D? VelocityPhysicalBone;
 
-	public override Dynamic Head => GetAttachment(CharacterAttachmentEnum.Head);
-
 	[Editable, ScriptProperty, Export, SyncVar]
 	public Color HeadColor
 	{
@@ -274,6 +272,10 @@ public sealed partial class PolytorianModel : CharacterModel
 		AnimTree.Active = true;
 
 		base.Init();
+
+		Head = GetAttachment(CharacterAttachmentEnum.Head);
+		ToolAttachment = GetAttachment(CharacterAttachmentEnum.HandRight); // TODO: lefthanded representation
+
 		SetProcess(true);
 	}
 
@@ -591,7 +593,7 @@ public sealed partial class PolytorianModel : CharacterModel
 	}
 
 	[ScriptMethod]
-	public override Dynamic GetAttachment(CharacterAttachmentEnum attachmentEnum)
+	public Dynamic GetAttachment(CharacterAttachmentEnum attachmentEnum)
 	{
 		if (!_attachmentEnumToDyn.TryGetValue(attachmentEnum, out Dynamic? dyn))
 		{

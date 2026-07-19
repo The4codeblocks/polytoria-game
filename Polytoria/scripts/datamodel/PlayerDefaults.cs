@@ -100,13 +100,13 @@ public sealed partial class PlayerDefaults : HiddenBase
 		}
 	}
 
-
 	[Editable, ScriptProperty]
 	public bool ChatColorsEnabled
 	{
 		get => _chatColorsEnabled;
 		set { _chatColorsEnabled = value; OnPropertyChanged(); }
 	}
+
 	[Editable, ScriptProperty]
 	public bool CanMove
 	{

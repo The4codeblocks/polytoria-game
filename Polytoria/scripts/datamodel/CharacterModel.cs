@@ -58,6 +58,8 @@ public partial class CharacterModel : Physical
 	public const string BubbleChatScene = "res://scenes/client/spatial/chat/bubble_chat.tscn";
 	private const float CoyoteTime = 0.15f;
 	private Sound? _jumpSound;
+	public Dynamic? _head;
+	public Dynamic? _toolAttachment;
 
 	public const float ForwardRaycastRange = 1;
 	public const float StairForwardRaycastRange = 4;
@@ -74,8 +76,6 @@ public partial class CharacterModel : Physical
 
 	protected override float PositionSyncThreshold => 0.1f;
 	protected override float RotationSyncThreshold => 1f;
-
-	public virtual Dynamic Head => this;
 
 	// List of all emotes
 	public static readonly string[] EmoteList =
@@ -102,6 +102,28 @@ public partial class CharacterModel : Physical
 		"scream",
 		"disappointed",
 	];
+
+	[Editable, ScriptProperty]
+	public Dynamic? Head
+	{
+		get => _head;
+		set
+		{
+			_head = value;
+			OnPropertyChanged();
+		}
+	}
+
+	[Editable, ScriptProperty, SyncVar]
+	public Dynamic? ToolAttachment
+	{
+		get => _toolAttachment;
+		set
+		{
+			_toolAttachment = value;
+			OnPropertyChanged();
+		}
+	}
 
 	[Editable, ScriptProperty]
 	public Sound? JumpSound
@@ -734,7 +756,7 @@ public partial class CharacterModel : Physical
 			UpdateScale = false
 		};
 
-		Dynamic attachment = GetAttachment(CharacterModel.CharacterAttachmentEnum.HandRight);
+		Dynamic attachment = ToolAttachment ?? this;
 		attachment.GDNode.AddChild(_toolRemoteTransform, @internal: Node.InternalMode.Back);
 
 		// stick and stones
@@ -1392,12 +1414,6 @@ public partial class CharacterModel : Physical
 
 	public virtual void RecvBlendValue(CharacterModelBlendEnum blendName, float blendValue) { }
 	public virtual void RecvSpeedValue(float speedValue) { }
-
-	[ScriptMethod]
-	public virtual Dynamic GetAttachment(CharacterAttachmentEnum attachmentEnum)
-	{
-		throw new NotImplementedException();
-	}
 
 	public virtual void ApplyCameraModifier(Camera camera) { }
 

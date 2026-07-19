@@ -48,7 +48,6 @@ public sealed partial class Player : NPC
 
 	internal bool teleporting = false;
 
-	private bool _useRemoteCamAttach = false;
 	private Physical? _mouseHoveringOn;
 
 	public Vector3 DefaultSpawnLocation = new(0, 5, 0);
@@ -516,12 +515,6 @@ public sealed partial class Player : NPC
 		IsLocal = true;
 		SendPing();
 
-		Camera curcam = Root.Environment.CurrentCamera;
-		if (Root.PlayerDefaults.AutoCameraFollow && curcam.Mode == Camera.CameraModeEnum.Follow)
-		{
-			curcam.Target = Character;
-		}
-
 		Camera? cam = Root.Environment.CurrentCamera;
 		if (cam == null) return;
 		cam.FirstPersonEntered.Connect(OnFirstPersonEntered);
@@ -717,13 +710,10 @@ public sealed partial class Player : NPC
 		Character?.AutoUpdateNetTransform = false;
 		UpdatePlayerCollision();
 
-		Camera curcam = Root.Environment.CurrentCamera;
-		if (
-			curcam.Mode == Camera.CameraModeEnum.Follow &&
-			(Root.PlayerDefaults.AutoCameraFollow || curcam.Target == oldChar)
-		)
+		Camera? curcam = Root.Environment.CurrentCamera;
+		if (curcam is not null && curcam.Mode == Camera.CameraModeEnum.Follow && Root.PlayerDefaults.AutoCameraFollow)
 		{
-			curcam.Target = Character?.Head;
+			curcam.Target = Character?.Head ?? Character;
 		}
 	}
 
