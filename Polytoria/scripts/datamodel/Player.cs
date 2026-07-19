@@ -342,10 +342,6 @@ public sealed partial class Player : NPC
 	public override void Process(double delta)
 	{
 		base.Process(delta);
-		if (!Root.Network.IsServer)
-		{
-			UpdateCamera(delta);
-		}
 
 		if (!IsLocal || !IsReady)
 		{
@@ -382,8 +378,6 @@ public sealed partial class Player : NPC
 
 		if (Character is PolytorianModel pt && pt.Ragdolling)
 		{
-			// ragdoll camera update
-			UpdateCamera(delta);
 			return;
 		}
 
@@ -403,13 +397,10 @@ public sealed partial class Player : NPC
 			// just in case it's anchored cuz ragdoll
 			if (Character is PolytorianModel pt2 && pt2.Ragdolling == false)
 			{
-				UpdateCamera(delta);
 			}
 			AfkTick(delta);
 			return;
 		}
-
-		if (Character.IsSitting) UpdateCamera(delta);
 
 		Camera? cam = Root.Environment.CurrentCamera;
 
