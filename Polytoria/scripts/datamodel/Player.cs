@@ -648,9 +648,9 @@ public sealed partial class Player : NPC
 			if (Character is PolytorianModel ptmodel)
 			{
 				ptmodel.StopRagdoll();
+				ptmodel.ResetAppearance();
 			}
 			Character.Velocity = Vector3.Zero;
-			Character.ResetAppearance();
 			Character.WrapToSpawnPoint();
 			Character.Health = Character.MaxHealth;
 			Character.Anchored = false;

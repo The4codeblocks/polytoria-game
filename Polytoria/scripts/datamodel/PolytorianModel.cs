@@ -710,6 +710,23 @@ public sealed partial class PolytorianModel : CharacterModel
 	}
 
 	[ScriptMethod]
+	public void ResetAppearance()
+	{
+		ClearAppearance();
+		if (Controller is Player plr && plr.AutoLoadAppearance)
+		{
+			if (Root.Entry != null && Root.Entry.IsSoloTest)
+			{
+				LoadAppearance(1144);
+			}
+			else
+			{
+				LoadAppearance(plr.UserID);
+			}
+		}
+	}
+
+	[ScriptMethod]
 	public void ClearAppearance()
 	{
 		HeadColor = _defaultBodyColor;

@@ -457,23 +457,6 @@ public partial class CharacterModel : Physical
 		}
 	}
 
-	[ScriptMethod]
-	public void ResetAppearance()
-	{
-		ClearAppearance();
-		if (Controller is Player plr && plr.AutoLoadAppearance)
-		{
-			if (Root.Entry != null && Root.Entry.IsSoloTest)
-			{
-				LoadAppearance(1144);
-			}
-			else
-			{
-				LoadAppearance(plr.UserID);
-			}
-		}
-	}
-
 	public void WrapToSpawnPoint()
 	{
 		if (Root.Environment.SpawnPoints.Count > 0)

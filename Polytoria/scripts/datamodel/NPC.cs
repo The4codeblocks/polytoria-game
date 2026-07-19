@@ -461,7 +461,7 @@ public partial class NPC : Instance
 	{
 		if (Character is PolytorianModel ptm)
 		{
-			ptm.LoadAppearance();
+			ptm.LoadAppearance(value);
 		}
 	}
 
@@ -845,10 +845,13 @@ public partial class NPC : Instance
 	}
 
 
-	[ScriptMethod, Attributes.Obsolete("Use Character.ResetAppearance() instead")]
+	[ScriptMethod, Attributes.Obsolete("Use Character.ResetAppearance() instead, only if it's a PolytorianModel")]
 	public void ResetAppearance()
 	{
-		Character?.ResetAppearance();
+		if (Character is PolytorianModel ptm)
+		{
+			ptm.ResetAppearance();
+		}
 	}
 
 	[Editable, ScriptProperty]
