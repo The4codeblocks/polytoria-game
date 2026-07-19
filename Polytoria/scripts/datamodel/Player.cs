@@ -353,14 +353,6 @@ public sealed partial class Player : NPC
 		}
 	}
 
-	private void UpdateCamera(double delta)
-	{
-		if (Root.Environment.CurrentCamera?.Mode != Camera.CameraModeEnum.Scripted)
-		{
-			Root.Environment.CurrentCamera?.CameraProcess(delta);
-		}
-	}
-
 	private void AfkTick(double delta)
 	{
 		// Disable AFK kick if local test

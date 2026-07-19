@@ -453,7 +453,7 @@ public sealed partial class Camera : Dynamic
 
 	private Vector3 latentTrackedPos = Vector3.Zero;
 
-	internal void CameraProcess(double delta)
+	public override void Process(double delta)
 	{
 		if (Root.Environment.CurrentCamera != this) return;
 		if (Mode == CameraModeEnum.Follow)
