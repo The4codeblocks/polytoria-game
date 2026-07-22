@@ -801,14 +801,14 @@ public sealed partial class Gizmos : Node
 					Quaternion dragRotation = trans.Basis.GetRotationQuaternion();
 					Vector3 posdiff = (newpos - dragCenter);
 					Vector3 surfaceSnap = posdiff.Dot(hitNormal) * hitNormal;
-					Quaternion verticalize = new Quaternion(Vector3.Up, hitNormal);
-					Vector3 plane = ((posdiff - surfaceSnap) * dragRotation) * verticalize;
+					Quaternion verticalize = new Quaternion(hitNormal * dragRotation, Vector3.Up);
+					Vector3 plane = verticalize * ((posdiff - surfaceSnap) * dragRotation);
 					Vector3 snapped = new Vector3(
 						Mathf.Snapped(plane.X, snapAmount),
 						0,
 						Mathf.Snapped(plane.Z, snapAmount)
 					);
-					Vector3 rotatedSnappedPlane = dragRotation * (verticalize * snapped);
+					Vector3 rotatedSnappedPlane = dragRotation * (snapped * verticalize);
 					newpos = surfaceSnap + rotatedSnappedPlane + dragCenter;
 				}
 				Vector3 realoffset = newpos - item.Position;
