@@ -187,6 +187,18 @@ public partial class Physical : Dynamic
 	{
 		bool finalVal = _anchored;
 
+		if (this is Part part && part.Assembly != null)
+		{
+			if (part.Assembly.Root == part)
+			{
+				finalVal = part.Assembly.Anchored;
+			}
+			else
+			{
+				finalVal = true;
+			}
+		}
+
 		if (Root != null && Root.Network != null)
 		{
 			if (Root.SessionType == World.SessionTypeEnum.Creator || !Root.IsLoaded)
@@ -219,7 +231,7 @@ public partial class Physical : Dynamic
 
 		if (!OverridePhysicsProcess)
 		{
-			SetPhysicsProcess(!_anchored);
+			SetPhysicsProcess(!finalVal);
 		}
 	}
 
@@ -325,10 +337,26 @@ public partial class Physical : Dynamic
 	}
 
 	public Physical? PhysicalRoot { get; private set; }
+	internal Physical? AssemblyCollisionRoot { get; private set; }
 
 	internal bool OverrideCanCollide = false;
 	internal bool OverrideCanCollideTo = false;
 	internal bool OverridePhysicsProcess = false;
+
+	internal void SetAssemblyCollisionRoot(Physical? root)
+	{
+		if (AssemblyCollisionRoot == root)
+		{
+			return;
+		}
+
+		AssemblyCollisionRoot = root;
+
+		foreach (CollisionShape3D shape in CollisionShapes.ToArray())
+		{
+			PostCollisionShapeUpdate(shape);
+		}
+	}
 
 	public override void HiddenChanged(bool to)
 	{
@@ -904,6 +932,11 @@ public partial class Physical : Dynamic
 
 	private Node GetCollisionShapeRoot()
 	{
+		if (AssemblyCollisionRoot != null && Node.IsInstanceValid(AssemblyCollisionRoot.GDNode))
+		{
+			return AssemblyCollisionRoot.GDNode;
+		}
+
 		if (PhysicalRoot != null)
 		{
 			return PhysicalRoot.GDNode;
