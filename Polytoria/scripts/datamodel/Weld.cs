@@ -15,8 +15,8 @@ public partial class Weld : Instance
 	private Instance? _part0;
 	private Instance? _part1;
 
-	private Part? _registered0;
-	private Part? _registered1;
+	private RigidBody? _registered0;
+	private RigidBody? _registered1;
 
 	private bool _refreshQueued;
 	private bool _waitQueued;
@@ -98,13 +98,13 @@ public partial class Weld : Instance
 
 	private void RefreshRegistration()
 	{
-		Part? active0 = null;
-		Part? active1 = null;
+		RigidBody? active0 = null;
+		RigidBody? active1 = null;
 
 		if (IsActiveWeld())
 		{
-			active0 = _part0 as Part;
-			active1 = _part1 as Part;
+			active0 = _part0 as RigidBody;
+			active1 = _part1 as RigidBody;
 		}
 
 		if (_registered0 == active0 && _registered1 == active1)
@@ -131,8 +131,8 @@ public partial class Weld : Instance
 			return;
 		}
 
-		Part old0 = _registered0;
-		Part old1 = _registered1;
+		RigidBody old0 = _registered0;
+		RigidBody old1 = _registered1;
 
 		_registered0 = null;
 		_registered1 = null;
@@ -166,8 +166,8 @@ public partial class Weld : Instance
 			return false;
 		}
 
-		if (_part0 is not Part p0) return false;
-		if (_part1 is not Part p1) return false;
+		if (_part0 is not RigidBody p0) return false;
+		if (_part1 is not RigidBody p1) return false;
 		if (p0 == p1) return false;
 
 		if (!p0.IsPropReady || !p1.IsPropReady)

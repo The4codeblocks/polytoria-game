@@ -6,16 +6,16 @@ namespace Polytoria.Physics;
 
 public static class WeldAssemblyManager
 {
-	private static readonly Dictionary<Part, WeldAssembly> _assemblies = new(ReferenceEqualityComparer.Instance);
-	private static readonly Dictionary<Weld, (Part? part0, Part? part1)> _welds = new(ReferenceEqualityComparer.Instance);
-	private static readonly HashSet<Part> _dirtyParts = new(ReferenceEqualityComparer.Instance);
+	private static readonly Dictionary<RigidBody, WeldAssembly> _assemblies = new(ReferenceEqualityComparer.Instance);
+	private static readonly Dictionary<Weld, (RigidBody? part0, RigidBody? part1)> _welds = new(ReferenceEqualityComparer.Instance);
+	private static readonly HashSet<RigidBody> _dirtyParts = new(ReferenceEqualityComparer.Instance);
 	private static readonly HashSet<WeldAssembly> _dirtyAssemblies = new(ReferenceEqualityComparer.Instance);
 
 	private static bool _buildQueued;
 	private static bool _building;
 	private static int _bulkEditDepth;
 
-	internal static void OnWeldChanged(Weld weld, Part? old0, Part? old1, Part? new0, Part? new1)
+	internal static void OnWeldChanged(Weld weld, RigidBody? old0, RigidBody? old1, RigidBody? new0, RigidBody? new1)
 	{
 		if (old0 != null && old1 != null)
 		{
@@ -28,7 +28,7 @@ public static class WeldAssemblyManager
 		}
 	}
 
-	internal static void OnWeldAdded(Weld weld, Part a, Part b)
+	internal static void OnWeldAdded(Weld weld, RigidBody a, RigidBody b)
 	{
 		WeldGraph.Add(weld, a, b);
 		_welds[weld] = (a, b);
@@ -45,7 +45,7 @@ public static class WeldAssemblyManager
 		QueueBuild(b);
 	}
 
-	private static void QueueBuild(Part part)
+	private static void QueueBuild(RigidBody part)
 	{
 		if (part.IsDeleted || part.IsInTemporary)
 		{
@@ -84,12 +84,12 @@ public static class WeldAssemblyManager
 
 		try
 		{
-			HashSet<Part> dirty = new(_dirtyParts, ReferenceEqualityComparer.Instance);
+			HashSet<RigidBody> dirty = new(_dirtyParts, ReferenceEqualityComparer.Instance);
 			_dirtyParts.Clear();
 
-			HashSet<Part> visited = new(ReferenceEqualityComparer.Instance);
+			HashSet<RigidBody> visited = new(ReferenceEqualityComparer.Instance);
 
-			foreach (Part start in dirty)
+			foreach (RigidBody start in dirty)
 			{
 				if (visited.Contains(start))
 				{
@@ -101,9 +101,9 @@ public static class WeldAssemblyManager
 					continue;
 				}
 
-				HashSet<Part> component = WeldGraph.GetComponent(start);
+				HashSet<RigidBody> component = WeldGraph.GetComponent(start);
 
-				foreach (Part part in component)
+				foreach (RigidBody part in component)
 				{
 					visited.Add(part);
 				}
@@ -114,9 +114,9 @@ public static class WeldAssemblyManager
 				}
 
 				HashSet<WeldAssembly> oldAssemblies = new(ReferenceEqualityComparer.Instance);
-				Part? preferredRoot = null;
+				RigidBody? preferredRoot = null;
 
-				foreach (Part part in component)
+				foreach (RigidBody part in component)
 				{
 					if (_assemblies.TryGetValue(part, out WeldAssembly? oldAssembly))
 					{
@@ -132,7 +132,7 @@ public static class WeldAssemblyManager
 
 				foreach (WeldAssembly oldAssembly in oldAssemblies)
 				{
-					HashSet<Part> oldParts = new(oldAssembly.Parts, ReferenceEqualityComparer.Instance);
+					HashSet<RigidBody> oldParts = new(oldAssembly.Parts, ReferenceEqualityComparer.Instance);
 					oldAssembly.Destroy();
 					Unregister(oldParts);
 				}
@@ -200,7 +200,7 @@ public static class WeldAssemblyManager
 		}
 	}
 
-	internal static void OnWeldRemoved(Weld weld, Part? a, Part? b)
+	internal static void OnWeldRemoved(Weld weld, RigidBody? a, RigidBody? b)
 	{
 		if (_bulkEditDepth == 0)
 		{
@@ -257,10 +257,10 @@ public static class WeldAssemblyManager
 		if (old.Parts.Count == 0)
 			return;
 
-		HashSet<Part> oldParts = new(old.Parts, ReferenceEqualityComparer.Instance);
-		HashSet<Part> validParts = new(ReferenceEqualityComparer.Instance);
+		HashSet<RigidBody> oldParts = new(old.Parts, ReferenceEqualityComparer.Instance);
+		HashSet<RigidBody> validParts = new(ReferenceEqualityComparer.Instance);
 
-		foreach (Part part in oldParts)
+		foreach (RigidBody part in oldParts)
 		{
 			if (!part.IsDeleted && !part.IsInTemporary)
 				validParts.Add(part);
@@ -273,22 +273,22 @@ public static class WeldAssemblyManager
 			return;
 		}
 
-		List<HashSet<Part>> components = [];
-		HashSet<Part> unvisited = new(validParts, ReferenceEqualityComparer.Instance);
+		List<HashSet<RigidBody>> components = [];
+		HashSet<RigidBody> unvisited = new(validParts, ReferenceEqualityComparer.Instance);
 
 		while (unvisited.Count > 0)
 		{
-			Part start = default!;
+			RigidBody start = default!;
 
-			foreach (Part part in unvisited)
+			foreach (RigidBody part in unvisited)
 			{
 				start = part;
 				break;
 			}
 
-			HashSet<Part> component = WeldGraph.GetComponentWithin(start, validParts);
+			HashSet<RigidBody> component = WeldGraph.GetComponentWithin(start, validParts);
 
-			foreach (Part part in component)
+			foreach (RigidBody part in component)
 				unvisited.Remove(part);
 
 			if (component.Count > 0)
@@ -300,9 +300,9 @@ public static class WeldAssemblyManager
 			return;
 		}
 
-		HashSet<Part>? retained = null;
+		HashSet<RigidBody>? retained = null;
 
-		foreach (HashSet<Part> component in components)
+		foreach (HashSet<RigidBody> component in components)
 		{
 			if (component.Contains(old.Root))
 			{
@@ -316,21 +316,21 @@ public static class WeldAssemblyManager
 			old.Destroy();
 			Unregister(oldParts);
 
-			foreach (HashSet<Part> component in components)
+			foreach (HashSet<RigidBody> component in components)
 				Build(component, null);
 
 			return;
 		}
 
-		List<HashSet<Part>> separatedComponents = [];
+		List<HashSet<RigidBody>> separatedComponents = [];
 
-		foreach (HashSet<Part> component in components)
+		foreach (HashSet<RigidBody> component in components)
 		{
 			if (!ReferenceEquals(component, retained))
 				separatedComponents.Add(component);
 		}
 
-		foreach (Part part in oldParts)
+		foreach (RigidBody part in oldParts)
 		{
 			if (retained.Contains(part))
 				continue;
@@ -345,7 +345,7 @@ public static class WeldAssemblyManager
 
 		RefreshAssemblyMetadata(old);
 
-		foreach (HashSet<Part> component in separatedComponents)
+		foreach (HashSet<RigidBody> component in separatedComponents)
 		{
 			if (component.Count <= 1)
 				continue;
@@ -359,7 +359,7 @@ public static class WeldAssemblyManager
 		float totalMass = 0;
 		bool anchored = false;
 
-		foreach (Part part in assembly.Parts)
+		foreach (RigidBody part in assembly.Parts)
 		{
 			anchored |= part.Anchored;
 			totalMass += Mathf.Max(part.Mass, Physical.MinMass);
@@ -371,12 +371,12 @@ public static class WeldAssemblyManager
 		{
 			assembly.Root.GDRigidBody.Mass = totalMass;
 
-			foreach (Part part in assembly.Parts)
+			foreach (RigidBody part in assembly.Parts)
 				part.UpdateFreeze();
 		}
 	}
 
-	internal static void OnPartDeleted(Part part)
+	internal static void OnPartDeleted(RigidBody part)
 	{
 		if (_bulkEditDepth == 0)
 		{
@@ -387,7 +387,7 @@ public static class WeldAssemblyManager
 
 		foreach (Weld weld in WeldGraph.GetWelds(part).ToArray())
 		{
-			Part? other = WeldGraph.GetOtherPart(weld, part);
+			RigidBody? other = WeldGraph.GetOtherPart(weld, part);
 			WeldGraph.Remove(weld, part, other);
 			_welds.Remove(weld);
 		}
@@ -406,7 +406,7 @@ public static class WeldAssemblyManager
 		RebuildDirtyAssembly(old);
 	}
 
-	private static WeldAssembly? GetAssembly(Part part)
+	private static WeldAssembly? GetAssembly(RigidBody part)
 	{
 		if (_assemblies.TryGetValue(part, out WeldAssembly? assembly))
 		{
@@ -418,25 +418,25 @@ public static class WeldAssemblyManager
 
 	private static void Register(WeldAssembly assembly)
 	{
-		foreach (Part part in assembly.Parts)
+		foreach (RigidBody part in assembly.Parts)
 		{
 			_assemblies[part] = assembly;
 		}
 	}
 
-	private static void Unregister(HashSet<Part> parts)
+	private static void Unregister(HashSet<RigidBody> parts)
 	{
-		foreach (Part part in parts)
+		foreach (RigidBody part in parts)
 		{
 			_assemblies.Remove(part);
 		}
 	}
 
-	private static void Build(HashSet<Part> parts, Part? preferredRoot)
+	private static void Build(HashSet<RigidBody> parts, RigidBody? preferredRoot)
 	{
 		if (parts.Count <= 1)
 		{
-			foreach (Part part in parts)
+			foreach (RigidBody part in parts)
 			{
 				_assemblies.Remove(part);
 				part.DetachFromAssembly();

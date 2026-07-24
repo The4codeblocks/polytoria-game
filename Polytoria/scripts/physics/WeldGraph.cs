@@ -5,15 +5,15 @@ namespace Polytoria.Physics;
 
 public static class WeldGraph
 {
-	private static readonly Dictionary<Part, List<Weld>> _welds = [];
+	private static readonly Dictionary<RigidBody, List<Weld>> _welds = [];
 
-	internal static void Add(Weld weld, Part a, Part b)
+	internal static void Add(Weld weld, RigidBody a, RigidBody b)
 	{
 		AddOne(a, weld);
 		AddOne(b, weld);
 	}
 
-	internal static void Remove(Weld weld, Part? a, Part? b)
+	internal static void Remove(Weld weld, RigidBody? a, RigidBody? b)
 	{
 		if (a != null)
 		{
@@ -26,7 +26,7 @@ public static class WeldGraph
 		}
 	}
 
-	private static void AddOne(Part part, Weld weld)
+	private static void AddOne(RigidBody part, Weld weld)
 	{
 		if (!_welds.TryGetValue(part, out List<Weld>? list))
 		{
@@ -45,7 +45,7 @@ public static class WeldGraph
 		}
 	}
 
-	private static void RemoveOne(Part part, Weld weld)
+	private static void RemoveOne(RigidBody part, Weld weld)
 	{
 		if (!_welds.TryGetValue(part, out List<Weld>? list))
 		{
@@ -60,7 +60,7 @@ public static class WeldGraph
 		}
 	}
 
-	internal static List<Weld> GetWelds(Part part)
+	internal static List<Weld> GetWelds(RigidBody part)
 	{
 		if (!_welds.TryGetValue(part, out List<Weld>? list))
 		{
@@ -70,25 +70,25 @@ public static class WeldGraph
 		return list;
 	}
 
-	internal static Part? GetOtherPart(Weld weld, Part part)
+	internal static RigidBody? GetOtherPart(Weld weld, RigidBody part)
 	{
 		if (weld.Part0 == part)
 		{
-			return weld.Part1 as Part;
+			return weld.Part1 as RigidBody;
 		}
 		else if (weld.Part1 == part)
 		{
-			return weld.Part0 as Part;
+			return weld.Part0 as RigidBody;
 		}
 
 		return null;
 	}
 
-	internal static bool AreConnected(Part a, Part b)
+	internal static bool AreConnected(RigidBody a, RigidBody b)
 	{
 		foreach (Weld weld in GetWelds(a))
 		{
-			Part? other = GetOtherPart(weld, a);
+			RigidBody? other = GetOtherPart(weld, a);
 			if (other == b)
 			{
 				return true;
@@ -98,9 +98,9 @@ public static class WeldGraph
 		return false;
 	}
 
-	internal static bool TryGetParts(Weld weld, out Part a, out Part b)
+	internal static bool TryGetParts(Weld weld, out RigidBody a, out RigidBody b)
 	{
-		if (weld.Part0 is Part p0 && weld.Part1 is Part p1 && p0 != p1)
+		if (weld.Part0 is RigidBody p0 && weld.Part1 is RigidBody p1 && p0 != p1)
 		{
 			a = p0;
 			b = p1;
@@ -112,26 +112,26 @@ public static class WeldGraph
 		return false;
 	}
 
-	internal static bool AreConnected(Part start, Part target, HashSet<Part> limit)
+	internal static bool AreConnected(RigidBody start, RigidBody target, HashSet<RigidBody> limit)
 	{
 		if (start == target)
 		{
 			return true;
 		}
 
-		HashSet<Part> visited = [];
-		Queue<Part> queue = [];
+		HashSet<RigidBody> visited = [];
+		Queue<RigidBody> queue = [];
 
 		visited.Add(start);
 		queue.Enqueue(start);
 
 		while (queue.Count > 0)
 		{
-			Part current = queue.Dequeue();
+			RigidBody current = queue.Dequeue();
 
 			foreach (Weld weld in GetWelds(current))
 			{
-				Part? next = GetOtherPart(weld, current);
+				RigidBody? next = GetOtherPart(weld, current);
 				if (next == null || next.IsDeleted || !limit.Contains(next))
 				{
 					continue;
@@ -152,10 +152,10 @@ public static class WeldGraph
 		return false;
 	}
 
-	internal static HashSet<Part> GetComponent(Part start)
+	internal static HashSet<RigidBody> GetComponent(RigidBody start)
 	{
-		HashSet<Part> result = new(ReferenceEqualityComparer.Instance);
-		Queue<Part> queue = new();
+		HashSet<RigidBody> result = new(ReferenceEqualityComparer.Instance);
+		Queue<RigidBody> queue = new();
 
 		if (start.IsDeleted || start.IsInTemporary)
 		{
@@ -167,7 +167,7 @@ public static class WeldGraph
 
 		while (queue.Count > 0)
 		{
-			Part part = queue.Dequeue();
+			RigidBody part = queue.Dequeue();
 
 			if (!_welds.TryGetValue(part, out List<Weld>? welds))
 			{
@@ -176,7 +176,7 @@ public static class WeldGraph
 
 			foreach (Weld weld in welds)
 			{
-				Part? other = GetOtherPart(weld, part);
+				RigidBody? other = GetOtherPart(weld, part);
 
 				if (other == null)
 				{
@@ -198,10 +198,10 @@ public static class WeldGraph
 		return result;
 	}
 
-	internal static HashSet<Part> GetComponentWithin(Part start, HashSet<Part> limit)
+	internal static HashSet<RigidBody> GetComponentWithin(RigidBody start, HashSet<RigidBody> limit)
 	{
-		HashSet<Part> visited = new(ReferenceEqualityComparer.Instance);
-		Queue<Part> queue = new();
+		HashSet<RigidBody> visited = new(ReferenceEqualityComparer.Instance);
+		Queue<RigidBody> queue = new();
 
 		if (!limit.Contains(start))
 		{
@@ -213,11 +213,11 @@ public static class WeldGraph
 
 		while (queue.Count > 0)
 		{
-			Part current = queue.Dequeue();
+			RigidBody current = queue.Dequeue();
 
 			foreach (Weld weld in GetWelds(current))
 			{
-				Part? next = GetOtherPart(weld, current);
+				RigidBody? next = GetOtherPart(weld, current);
 				if (next == null || next.IsDeleted || !limit.Contains(next))
 				{
 					continue;

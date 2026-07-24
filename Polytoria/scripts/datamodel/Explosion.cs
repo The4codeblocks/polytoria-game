@@ -129,7 +129,7 @@ public partial class Explosion : Dynamic
 		}
 
 		HashSet<Instance> processed = [];
-		HashSet<Part> toCheck = new(ReferenceEqualityComparer.Instance);
+		HashSet<RigidBody> toCheck = new(ReferenceEqualityComparer.Instance);
 		HashSet<Weld> breakWelds = new(ReferenceEqualityComparer.Instance);
 		List<Entity> forceTargets = [];
 		List<Player> playerTargets = [];
@@ -154,15 +154,15 @@ public partial class Explosion : Dynamic
 				}
 			}
 
-			if (item is Entity e && !item.IsDescendantOfClass("Accessory"))
+			if (item is RigidBody e && !item.IsDescendantOfClass("Accessory"))
 			{
 				bool skipForce = e.Anchored && !AffectAnchored && AffectPredicate == null;
 
-				if (_affectWelds && item is Part p)
+				if (_affectWelds && item is RigidBody p)
 				{
 					if (p.Assembly != null && p.Assembly.Physicalized)
 					{
-						foreach (Part assemblyPart in p.Assembly.Parts)
+						foreach (RigidBody assemblyPart in p.Assembly.Parts)
 						{
 							toCheck.Add(assemblyPart);
 						}
@@ -212,11 +212,11 @@ public partial class Explosion : Dynamic
 
 		if (_affectWelds)
 		{
-			foreach (Part part in toCheck)
+			foreach (RigidBody part in toCheck)
 			{
 				foreach (Weld weld in WeldGraph.GetWelds(part).ToArray())
 				{
-					if (!WeldGraph.TryGetParts(weld, out Part a, out Part b))
+					if (!WeldGraph.TryGetParts(weld, out RigidBody a, out RigidBody b))
 					{
 						continue;
 					}
@@ -242,7 +242,7 @@ public partial class Explosion : Dynamic
 		Delete();
 	}
 
-	private bool IsWeldAffected(Part a, Part b)
+	private bool IsWeldAffected(RigidBody a, RigidBody b)
 	{
 		Aabb aa = a.GetSelfBound();
 		Aabb bb = b.GetSelfBound();

@@ -127,7 +127,7 @@ public partial class NetworkTransformSync : Instance
 		// Check if self has the network authority
 		if (!CheckDynAuthor(dyn, NetService.LocalPeerID)) return;
 
-		if (dyn is Part part && part.Assembly != null && part.Assembly.Physicalized && part.Assembly.Root != part)
+		if (dyn is RigidBody part && part.Assembly != null && part.Assembly.Physicalized && part.Assembly.Root != part)
 		{
 			return;
 		}
@@ -224,7 +224,7 @@ public partial class NetworkTransformSync : Instance
 	{
 		if (!NetService.IsServer) return;
 		if (!dyn.IsNetworkReady) return;
-		if (dyn is Part part && part.Assembly != null && part.Assembly.Physicalized && part.Assembly.Root != part)
+		if (dyn is RigidBody part && part.Assembly != null && part.Assembly.Physicalized && part.Assembly.Root != part)
 		{
 			return;
 		}

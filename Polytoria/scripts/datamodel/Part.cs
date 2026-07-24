@@ -21,17 +21,12 @@ public partial class Part : Entity
 	private bool _isSeparateMesh = false;
 	private bool _castShadows;
 
-	private Node3D _nRemoteAt = null!; // Remote collider proxy
-
 	internal Shape3D ColliderShape => _collider.Shape;
-	internal WeldAssembly? Assembly { get; private set; }
-	internal Transform3D AssemblyLocalTransform = Transform3D.Identity;
 
 	public bool IsMeshSeparated => _isSeparateMesh;
 	public int BridgeID = -1;
 
 	private Node? _originalMeshParent;
-	private Node? _originalRemoteParent;
 
 	public override void EnterTree()
 	{
@@ -261,7 +256,7 @@ public partial class Part : Entity
 		}
 	}
 
-	internal void AttachToAssembly(WeldAssembly ass, Part root, Transform3D localTrans)
+	internal new void AttachToAssembly(WeldAssembly ass, RigidBody root, Transform3D localTrans)
 	{
 		Assembly = ass;
 		AssemblyLocalTransform = localTrans;
@@ -304,7 +299,7 @@ public partial class Part : Entity
 		}
 	}
 
-	internal void DetachFromAssembly()
+	internal new void DetachFromAssembly()
 	{
 		Transform3D currentTrans;
 		if (Assembly == null)
@@ -352,20 +347,6 @@ public partial class Part : Entity
 
 		UpdateFreeze();
 		UpdateCollision();
-	}
-
-	internal bool TryGetAssemblyTransform(out Transform3D trans)
-	{
-		if (Assembly == null || Assembly.Root == this)
-		{
-			trans = default;
-			return false;
-		}
-
-		Transform3D rootBody = Assembly.Root.GDNode3D.GlobalTransform;
-		trans = rootBody * AssemblyLocalTransform * Transform3D.Identity.Scaled(NodeSize);
-
-		return true;
 	}
 
 	public override Aabb GetSelfBound()

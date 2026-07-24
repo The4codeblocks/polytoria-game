@@ -8,9 +8,9 @@ namespace Polytoria.Physics;
 
 public class WeldAssembly
 {
-	public Part Root = null!;
-	public HashSet<Part> Parts = [];
-	public Dictionary<Part, Transform3D> LocalTransforms = [];
+	public RigidBody Root = null!;
+	public HashSet<RigidBody> Parts = [];
+	public Dictionary<RigidBody, Transform3D> LocalTransforms = [];
 	public bool Anchored;
 
 	internal bool Physicalized; // Set to false in creator to let creators manipulate parts in weld assemblies, physics dont apply there anyways
@@ -19,7 +19,7 @@ public class WeldAssembly
 	{
 		if (Physicalized)
 		{
-			foreach (Part part in Parts)
+			foreach (RigidBody part in Parts)
 			{
 				part.DetachFromAssembly();
 			}
@@ -29,7 +29,7 @@ public class WeldAssembly
 		LocalTransforms.Clear();
 	}
 
-	private static bool IsBetterRootCandidate(Part candidate, Part? current, Part? preferredRoot)
+	private static bool IsBetterRootCandidate(RigidBody candidate, RigidBody? current, RigidBody? preferredRoot)
 	{
 		if (current == null)
 			return true;
@@ -49,20 +49,20 @@ public class WeldAssembly
 		return string.CompareOrdinal(candidate.NetworkedObjectID, current.NetworkedObjectID) < 0;
 	}
 
-	public static WeldAssembly Build(HashSet<Part> parts, Part? preferredRoot)
+	public static WeldAssembly Build(HashSet<RigidBody> parts, RigidBody? preferredRoot)
 	{
 		if (parts.Count == 0)
 		{
 			throw new System.ArgumentException("Empty part set given");
 		}
 
-		Part? root = null;
+		RigidBody? root = null;
 		float totalMass = 0;
 		bool hasAnchoreds = false;
 
 		// parts are picked in this order: preferred -> anchored -> largest mass -> lowest network id
 		// try to do as many checks as possible in one loop to avoid looping multiple times
-		foreach (Part part in parts)
+		foreach (RigidBody part in parts)
 		{
 			hasAnchoreds |= part.Anchored;
 			totalMass += Mathf.Max(part.Mass, Physical.MinMass);
@@ -85,7 +85,7 @@ public class WeldAssembly
 		// in creator we dont want to reparent everything since it will block them from selecting anything other than the root part
 		bool isCreator = root.Root != null && root.Root.SessionType == World.SessionTypeEnum.Creator;
 
-		foreach (Part part in parts)
+		foreach (RigidBody part in parts)
 		{
 			part.ForceUpdateTransform();
 		}
@@ -93,7 +93,7 @@ public class WeldAssembly
 		Transform3D rootInv = root.GDNode3D.GlobalTransform.AffineInverse();
 
 		// unfortunately we have to loop through the parts again to set up the assembly after root was picked
-		foreach (Part part in parts)
+		foreach (RigidBody part in parts)
 		{
 			Transform3D localTrans = rootInv * part.GDNode3D.GlobalTransform;
 			assembly.LocalTransforms[part] = localTrans;
@@ -111,7 +111,7 @@ public class WeldAssembly
 
 		assembly.Physicalized = true;
 		root.GDRigidBody.Mass = totalMass;
-		foreach (Part part in parts)
+		foreach (RigidBody part in parts)
 		{
 			part.UpdateFreeze();
 		}
