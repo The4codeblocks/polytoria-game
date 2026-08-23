@@ -594,16 +594,18 @@ public sealed partial class PolytorianModel : CharacterModel
 		return dyn;
 	}
 
-	private readonly Dictionary<CharacterBoneEnum, Physical> _boneEnumToPhys = [];
+	private readonly Dictionary<CharacterBoneEnum, PhysicsBone> _boneEnumToPhysBone = [];
 
 	[ScriptMethod]
-	public Physical GetBone(CharacterBoneEnum boneEnum)
+	public PhysicsBone GetBone(CharacterBoneEnum boneEnum)
 	{
-		if (!_boneEnumToPhys.TryGetValue(boneEnum, out Physical? phys))
+		if (!_boneEnumToPhysBone.TryGetValue(boneEnum, out PhysicsBone? phys))
 		{
 			Node3D a = GetNode3DBone(boneEnum);
-			phys = New<Physical>();
+			phys = New<PhysicsBone>();
+			phys.SetPhysicsProcess(true);
 			phys.OverrideGDNode(a);
+			_boneEnumToPhysBone[boneEnum] = phys;
 		}
 
 		return phys;
