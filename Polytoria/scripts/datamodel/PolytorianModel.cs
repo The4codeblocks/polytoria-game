@@ -71,7 +71,6 @@ public sealed partial class PolytorianModel : CharacterModel
 	private bool _faceOverrided = false;
 	private bool _bodyOverrided = false;
 	private CharacterAnimHelper _helper = null!;
-	private readonly Dictionary<CharacterAttachmentEnum, Dynamic> _attachmentEnumToDyn = [];
 	private PackedScene? _bodyPkScene;
 	private bool _updateClothDirty = false;
 
@@ -580,6 +579,8 @@ public sealed partial class PolytorianModel : CharacterModel
 		RagdollStopped.Invoke();
 	}
 
+	private readonly Dictionary<CharacterAttachmentEnum, Dynamic> _attachmentEnumToDyn = [];
+
 	[ScriptMethod]
 	public override Dynamic GetAttachment(CharacterAttachmentEnum attachmentEnum)
 	{
@@ -593,27 +594,73 @@ public sealed partial class PolytorianModel : CharacterModel
 		return dyn;
 	}
 
+	private readonly Dictionary<CharacterBoneEnum, Physical> _boneEnumToPhys = [];
+
+	[ScriptMethod]
+	public Physical GetBone(CharacterBoneEnum boneEnum)
+	{
+		if (!_boneEnumToPhys.TryGetValue(boneEnum, out Physical? phys))
+		{
+			Node3D a = GetNode3DBone(boneEnum);
+			phys = New<Physical>();
+			phys.OverrideGDNode(a);
+		}
+
+		return phys;
+	}
+
+	private readonly Dictionary<CharacterAttachmentEnum, string> _attachmentEnumToPath = new(){
+		{CharacterAttachmentEnum.Head, "Character/Poly/Skeleton3D/O_Head/HeadAttachment"},
+		{CharacterAttachmentEnum.UpperTorso, "Character/Poly/Skeleton3D/O_UpperTorso/UpperTorsoAttachment"},
+		{CharacterAttachmentEnum.LowerTorso, "Character/Poly/Skeleton3D/O_LowerTorso/LowerTorsoAttachment"},
+		{CharacterAttachmentEnum.ShoulderLeft, "Character/Poly/Skeleton3D/O_UpperArm_L/LeftShoulderAttachment"},
+		{CharacterAttachmentEnum.ShoulderRight, "Character/Poly/Skeleton3D/O_UpperArm_R/RightShoulderAttachment"},
+		{CharacterAttachmentEnum.ElbowLeft, "Character/Poly/Skeleton3D/O_LowerArm_L/LeftElbowAttachment"},
+		{CharacterAttachmentEnum.ElbowRight, "Character/Poly/Skeleton3D/O_LowerArm_R/RightElbowAttachment"},
+		{CharacterAttachmentEnum.HandLeft, "Character/Poly/Skeleton3D/O_Hand_L/LeftHandAttachment"},
+		{CharacterAttachmentEnum.HandRight, "Character/Poly/Skeleton3D/O_Hand_R/RightHandAttachment"},
+		{CharacterAttachmentEnum.LegLeft, "Character/Poly/Skeleton3D/O_UpperLeg_L/LeftLegAttachment"},
+		{CharacterAttachmentEnum.LegRight, "Character/Poly/Skeleton3D/O_UpperLeg_R/RightLegAttachment"},
+		{CharacterAttachmentEnum.KneeLeft, "Character/Poly/Skeleton3D/O_LowerLeg_L/LeftKneeAttachment"},
+		{CharacterAttachmentEnum.KneeRight, "Character/Poly/Skeleton3D/O_LowerLeg_R/RightKneeAttachment"},
+	};
+
 	public Node3D GetNode3DAttachment(CharacterAttachmentEnum attachmentEnum)
 	{
-		Node3D result = attachmentEnum switch
+		if (_attachmentEnumToPath.TryGetValue(attachmentEnum, out string path))
 		{
-			CharacterAttachmentEnum.Head => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_Head/HeadAttachment"),
-			CharacterAttachmentEnum.UpperTorso => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_UpperTorso/UpperTorsoAttachment"),
-			CharacterAttachmentEnum.LowerTorso => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerTorso/LowerTorsoAttachment"),
-			CharacterAttachmentEnum.ShoulderLeft => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_UpperArm_L/LeftShoulderAttachment"),
-			CharacterAttachmentEnum.ShoulderRight => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_UpperArm_R/RightShoulderAttachment"),
-			CharacterAttachmentEnum.ElbowLeft => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerArm_L/LeftElbowAttachment"),
-			CharacterAttachmentEnum.ElbowRight => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerArm_R/RightElbowAttachment"),
-			CharacterAttachmentEnum.HandLeft => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_Hand_L/LeftHandAttachment"),
-			CharacterAttachmentEnum.HandRight => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_Hand_R/RightHandAttachment"),
-			CharacterAttachmentEnum.LegLeft => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_UpperLeg_L/LeftLegAttachment"),
-			CharacterAttachmentEnum.LegRight => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_UpperLeg_R/RightLegAttachment"),
-			CharacterAttachmentEnum.KneeLeft => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerLeg_L/LeftKneeAttachment"),
-			CharacterAttachmentEnum.KneeRight => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerLeg_R/RightKneeAttachment"),
-			_ => throw new NotImplementedException(),
-		};
+			return GDNode.GetNode<Node3D>(path);
+		}
+		else
+		{
+			throw new NotImplementedException();
+		}
+	}
 
-		return result;
+	private readonly Dictionary<CharacterBoneEnum, string> _boneEnumToPath = new(){
+		{CharacterBoneEnum.Head, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone Head"},
+		{CharacterBoneEnum.UpperTorso, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone UpperTorso"},
+		{CharacterBoneEnum.LowerTorso, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone LowerTorso"},
+		{CharacterBoneEnum.UpperArmLeft, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone UpperArm_L"},
+		{CharacterBoneEnum.UpperArmRight, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone UpperArm_R"},
+		{CharacterBoneEnum.LowerArmLeft, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone LowerArm_L"},
+		{CharacterBoneEnum.LowerArmRight, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone LowerArm_R"},
+		{CharacterBoneEnum.UpperLegLeft, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone UpperLeg_L"},
+		{CharacterBoneEnum.UpperLegRight, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone UpperLeg_R"},
+		{CharacterBoneEnum.LowerLegLeft, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone LowerLeg_L"},
+		{CharacterBoneEnum.LowerLegRight, "Character/Poly/Skeleton3D/RagdollBone/Physical Bone LowerLeg_R"},
+	};
+
+	public Node3D GetNode3DBone(CharacterBoneEnum boneEnum)
+	{
+		if (_boneEnumToPath.TryGetValue(boneEnum, out string path))
+		{
+			return GDNode.GetNode<Node3D>(path);
+		}
+		else
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 	public override void RecvBlendValue(CharacterModelBlendEnum blendName, float blendValue)

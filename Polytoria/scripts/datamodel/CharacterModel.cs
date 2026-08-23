@@ -199,4 +199,20 @@ public partial class CharacterModel : Dynamic
 		FootLeft,
 		FootRight
 	}
+
+	[ScriptEnum]
+	public enum CharacterBoneEnum
+	{
+		Head,
+		UpperTorso,
+		LowerTorso,
+		UpperArmLeft,
+		UpperArmRight,
+		LowerArmLeft,
+		LowerArmRight,
+		UpperLegLeft,
+		UpperLegRight,
+		LowerLegLeft,
+		LowerLegRight
+	}
 }
