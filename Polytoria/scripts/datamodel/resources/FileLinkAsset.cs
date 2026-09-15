@@ -11,9 +11,11 @@ namespace Polytoria.Datamodel.Resources;
 /// Base class for asset that link to files
 /// </summary>
 [Instantiable, SaveIgnore]
-public partial class FileLinkAsset : BaseAsset
+public partial class FileLinkAsset : DataAsset
 {
 	private string _fileID = "";
+
+	public override byte[]? Data => ReadFile();
 
 	[Editable, ScriptProperty]
 	public string LinkedID

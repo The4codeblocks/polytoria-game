@@ -35,7 +35,7 @@ public partial class Script : Instance
 	internal readonly HashSet<int> LuauThreadReferences = [];
 
 	private string? _source;
-	private FileLinkAsset? _linkedFile;
+	private DataAsset? _linkedData;
 	private bool _compatibility = false;
 	private bool _isEnabled = true;
 
@@ -44,9 +44,9 @@ public partial class Script : Instance
 	{
 		get
 		{
-			if (_linkedFile != null)
+			if (_linkedData != null)
 			{
-				byte[]? data = _linkedFile.ReadFile();
+				byte[]? data = _linkedData.Data;
 				if (data != null)
 				{
 					return data.GetStringFromUtf8();
@@ -83,17 +83,17 @@ public partial class Script : Instance
 	}
 
 	[Editable, NoSync, CloneInclude, SaveInclude]
-	public FileLinkAsset? LinkedScript
+	public DataAsset? LinkedScript
 	{
-		get => _linkedFile;
+		get => _linkedData;
 		set
 		{
-			if (_linkedFile != null && _linkedFile != value)
+			if (_linkedData != null && _linkedData != value)
 			{
-				_linkedFile.UnlinkFrom(this);
+				_linkedData.UnlinkFrom(this);
 			}
-			_linkedFile = value;
-			_linkedFile?.LinkTo(this);
+			_linkedData = value;
+			_linkedData?.LinkTo(this);
 		}
 	}
 

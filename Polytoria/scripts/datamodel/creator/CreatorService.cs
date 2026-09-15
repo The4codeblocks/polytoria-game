@@ -329,9 +329,10 @@ public sealed partial class CreatorService : Node, IScriptObject
 	public static void OpenScript(Script script)
 	{
 		if (CurrentSession == null) return;
+		if (script.LinkedScript is Resources.FileLinkAsset f)
 		if (script.LinkedScript != null)
 		{
-			string? scriptPath = script.LinkedScript.LinkedPath;
+			string? scriptPath = f.LinkedPath;
 			if (scriptPath == null)
 			{
 				// TODO: We should have a popup dialog showing invalid references

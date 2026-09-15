@@ -364,10 +364,11 @@ public static class ProjectManager
 			// Path Mapping
 			sourceToPath[s.Source] = relativeScriptPath;
 
-			s.LinkedScript = root.Assets.GetFileLinkByPath(relativeScriptPath);
+			Datamodel.Resources.FileLinkAsset asset = root.Assets.GetFileLinkByPath(relativeScriptPath);
+			s.LinkedScript = asset;
 			addedScripts[fullKey] = targetFile;
 
-			indexToFile[s.LinkedScript.LinkedID] = relativeScriptPath;
+			indexToFile[asset.LinkedID] = relativeScriptPath;
 
 			i++;
 		}
