@@ -41,6 +41,7 @@ public partial class Dynamic : Instance
 	private bool _locked;
 	private bool _isFirstUpdate = true;
 	private bool _isDirty = false;
+	private bool _visible = true;
 
 	private Transform3D _oldPartTransformApplied;
 	private Transform3D _oldGlobalTransformApplied;
