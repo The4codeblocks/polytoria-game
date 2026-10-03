@@ -19,6 +19,7 @@ public partial class Part : Entity
 	private Color _color = new(1, 1, 1);
 	private bool _isSeparateMesh = false;
 	private bool _castShadows;
+	private bool _visible = true;
 
 	private Node3D _nRemoteAt = null!; // Remote collider proxy
 
